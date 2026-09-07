@@ -3,13 +3,8 @@ package com.rah885.kaamsetu
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import com.rah885.kaamsetu.ui.screens.home.HomeScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -18,20 +13,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "कामसेतु",
-                        style = MaterialTheme.typography.headlineLarge
-                    )
-
-                    Text(
-                        text = "आपके काम का सही साथी"
-                    )
-                }
+                HomeScreen(
+                    onCustomerClick = {
+                        // ग्राहक वाला अगला screen बाद में जोड़ेंगे
+                    },
+                    onWorkerClick = {
+                        // कामगार वाला अगला screen बाद में जोड़ेंगे
+                    }
+                )
             }
         }
     }
