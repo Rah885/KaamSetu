@@ -1,0 +1,1 @@
+# KaamSetu ProGuard rules
