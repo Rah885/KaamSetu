@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -19,27 +18,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 
 private data class CustomerNavItem(
     val title: String,
-    val icon: androidx.compose.ui.graphics.vector.ImageVector
+    val iconText: String
 )
 
 @Composable
 fun CustomerMainScreen() {
 
     val navItems = listOf(
-        CustomerNavItem("Home", Icons.Default.Home),
-        CustomerNavItem("Services", Icons.Default.Build),
-        CustomerNavItem("Requests", Icons.Default.Assignment),
-        CustomerNavItem("Alerts", Icons.Default.Notifications),
-        CustomerNavItem("Profile", Icons.Default.Person)
+        CustomerNavItem("Home", "⌂"),
+        CustomerNavItem("Services", "🔧"),
+        CustomerNavItem("Requests", "📋"),
+        CustomerNavItem("Alerts", "🔔"),
+        CustomerNavItem("Profile", "👤")
     )
 
     var selectedIndex by rememberSaveable {
@@ -57,13 +50,14 @@ fun CustomerMainScreen() {
                             selectedIndex = index
                         },
                         icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.title
+                            Text(
+                                text = item.iconText
                             )
                         },
                         label = {
-                            Text(item.title)
+                            Text(
+                                text = item.title
+                            )
                         }
                     )
                 }
@@ -118,4 +112,11 @@ private fun CustomerPlaceholderContent(
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-   
+    ) {
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium
+        )
+    }
+}
