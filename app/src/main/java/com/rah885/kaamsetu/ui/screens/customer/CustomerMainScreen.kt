@@ -53,20 +53,27 @@ fun CustomerMainScreen() {
     Scaffold(
         bottomBar = {
             NavigationBar {
+
                 navItems.forEachIndexed { index, item ->
 
                     NavigationBarItem(
                         selected = selectedIndex == index,
+
                         onClick = {
                             selectedIndex = index
+
+                            // नई tab खोलते समय Services का अंदर वाला
+                            // selection reset रहेगा
                             selectedService = null
                             selectedWorker = null
                         },
+
                         icon = {
                             Text(
                                 text = item.iconText
                             )
                         },
+
                         label = {
                             Text(
                                 text = item.title
@@ -87,11 +94,21 @@ fun CustomerMainScreen() {
 
             when (selectedIndex) {
 
-                0 -> CustomerHomeContent()
+                // -------------------------
+                // HOME
+                // -------------------------
+                0 -> {
+                    CustomerHomeContent()
+                }
 
+                // -------------------------
+                // SERVICES
+                // Services → Workers → Profile
+                // -------------------------
                 1 -> {
 
                     when {
+
                         selectedWorker != null -> {
 
                             val worker = selectedWorker!!
@@ -117,6 +134,7 @@ fun CustomerMainScreen() {
 
                             ServiceWorkersScreen(
                                 serviceName = selectedService!!,
+
                                 onWorkerClick = {
                                         workerName,
                                         workerService,
@@ -139,6 +157,7 @@ fun CustomerMainScreen() {
 
                             ServicesScreen(
                                 onServiceClick = { serviceName ->
+
                                     selectedService = serviceName
                                 }
                             )
@@ -146,11 +165,26 @@ fun CustomerMainScreen() {
                     }
                 }
 
-                2 -> CustomerPlaceholderContent("मेरी रिक्वेस्ट")
+                // -------------------------
+                // REQUESTS
+                // -------------------------
+                2 -> {
+                    MyRequestsScreen()
+                }
 
-                3 -> CustomerPlaceholderContent("नोटिफिकेशन")
+                // -------------------------
+                // ALERTS / NOTIFICATIONS
+                // -------------------------
+                3 -> {
+                    NotificationsScreen()
+                }
 
-                4 -> CustomerPlaceholderContent("प्रोफाइल")
+                // -------------------------
+                // PROFILE
+                // -------------------------
+                4 -> {
+                    ProfileScreen()
+                }
             }
         }
     }
@@ -173,23 +207,6 @@ private fun CustomerHomeContent() {
         Text(
             text = "आपके काम का सही साथी",
             modifier = Modifier.padding(top = 8.dp)
-        )
-    }
-}
-
-@Composable
-private fun CustomerPlaceholderContent(
-    title: String
-) {
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium
         )
     }
 }
