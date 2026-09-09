@@ -1,12 +1,9 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -20,7 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 
 private data class CustomerNavItem(
     val title: String,
@@ -62,8 +58,6 @@ fun CustomerMainScreen() {
                         onClick = {
                             selectedIndex = index
 
-                            // नई tab खोलते समय Services का अंदर वाला
-                            // selection reset रहेगा
                             selectedService = null
                             selectedWorker = null
                         },
@@ -94,17 +88,20 @@ fun CustomerMainScreen() {
 
             when (selectedIndex) {
 
-                // -------------------------
+                // =========================
                 // HOME
-                // -------------------------
+                // पुराना Home हटाया नहीं गया,
+                // बल्कि CustomerHomeScreen में
+                // पुराना + नया content है।
+                // =========================
                 0 -> {
-                    CustomerHomeContent()
+                    CustomerHomeScreen()
                 }
 
-                // -------------------------
+                // =========================
                 // SERVICES
                 // Services → Workers → Profile
-                // -------------------------
+                // =========================
                 1 -> {
 
                     when {
@@ -157,7 +154,6 @@ fun CustomerMainScreen() {
 
                             ServicesScreen(
                                 onServiceClick = { serviceName ->
-
                                     selectedService = serviceName
                                 }
                             )
@@ -165,48 +161,27 @@ fun CustomerMainScreen() {
                     }
                 }
 
-                // -------------------------
+                // =========================
                 // REQUESTS
-                // -------------------------
+                // =========================
                 2 -> {
                     MyRequestsScreen()
                 }
 
-                // -------------------------
-                // ALERTS / NOTIFICATIONS
-                // -------------------------
+                // =========================
+                // ALERTS
+                // =========================
                 3 -> {
                     NotificationsScreen()
                 }
 
-                // -------------------------
+                // =========================
                 // PROFILE
-                // -------------------------
+                // =========================
                 4 -> {
                     ProfileScreen()
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun CustomerHomeContent() {
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
-        Text(
-            text = "कामसेतु",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Text(
-            text = "आपके काम का सही साथी",
-            modifier = Modifier.padding(top = 8.dp)
-        )
     }
 }
