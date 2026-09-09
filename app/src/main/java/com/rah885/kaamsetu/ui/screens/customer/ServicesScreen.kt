@@ -23,7 +23,9 @@ private data class ServiceItem(
 )
 
 @Composable
-fun ServicesScreen() {
+fun ServicesScreen(
+    onServiceClick: (String) -> Unit = {}
+) {
 
     val services = listOf(
         ServiceItem("इलेक्ट्रिशियन", "🔧"),
@@ -66,7 +68,10 @@ fun ServicesScreen() {
             items(services) { service ->
 
                 ServiceCard(
-                    service = service
+                    service = service,
+                    onClick = {
+                        onServiceClick(service.name)
+                    }
                 )
             }
         }
@@ -75,10 +80,12 @@ fun ServicesScreen() {
 
 @Composable
 private fun ServiceCard(
-    service: ServiceItem
+    service: ServiceItem,
+    onClick: () -> Unit
 ) {
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
 
