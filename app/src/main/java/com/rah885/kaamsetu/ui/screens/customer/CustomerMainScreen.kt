@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +41,10 @@ fun CustomerMainScreen() {
         mutableIntStateOf(0)
     }
 
+    var selectedService by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -48,16 +54,13 @@ fun CustomerMainScreen() {
                         selected = selectedIndex == index,
                         onClick = {
                             selectedIndex = index
+                            selectedService = null
                         },
                         icon = {
-                            Text(
-                                text = item.iconText
-                            )
+                            Text(item.iconText)
                         },
                         label = {
-                            Text(
-                                text = item.title
-                            )
+                            Text(item.title)
                         }
                     )
                 }
@@ -68,16 +71,47 @@ fun CustomerMainScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
+                .padding(innerPadding)
         ) {
 
-            when (selectedIndex) {
-                0 -> CustomerHomeContent()
-                1 -> CustomerPlaceholderContent("सेवाएँ")
-                2 -> CustomerPlaceholderContent("मेरी रिक्वेस्ट")
-                3 -> CustomerPlaceholderContent("नोटिफिकेशन")
-                4 -> CustomerPlaceholderContent("प्रोफाइल")
+            if (selectedService != null) {
+
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                    Button(
+                        onClick = {
+                            selectedService = null
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text("← सेवाओं पर वापस जाएँ")
+                    }
+
+                    ServiceWorkersScreen(
+                        serviceName = selectedService!!
+                    )
+                }
+
+            } else {
+
+                when (selectedIndex) {
+
+                    0 -> CustomerHomeContent()
+
+                    1 -> CustomerServicesScreen(
+                        onServiceClick = { serviceName ->
+                            selectedService = serviceName
+                        }
+                    )
+
+                    2 -> CustomerPlaceholderContent("मेरी रिक्वेस्ट")
+
+                    3 -> CustomerPlaceholderContent("नोटिफिकेशन")
+
+                    4 -> CustomerPlaceholderContent("प्रोफाइल")
+                }
             }
         }
     }
