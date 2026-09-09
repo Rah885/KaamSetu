@@ -27,7 +27,14 @@ private data class ServiceWorkerItem(
 
 @Composable
 fun ServiceWorkersScreen(
-    serviceName: String
+    serviceName: String,
+    onWorkerClick: (
+        workerName: String,
+        serviceName: String,
+        rating: String,
+        distance: String,
+        available: Boolean
+    ) -> Unit = { _, _, _, _, _ -> }
 ) {
 
     val workers = listOf(
@@ -90,7 +97,16 @@ fun ServiceWorkersScreen(
             items(workers) { worker ->
 
                 ServiceWorkerCard(
-                    worker = worker
+                    worker = worker,
+                    onClick = {
+                        onWorkerClick(
+                            worker.name,
+                            worker.service,
+                            worker.rating,
+                            worker.distance,
+                            worker.available
+                        )
+                    }
                 )
             }
         }
@@ -99,10 +115,12 @@ fun ServiceWorkersScreen(
 
 @Composable
 private fun ServiceWorkerCard(
-    worker: ServiceWorkerItem
+    worker: ServiceWorkerItem,
+    onClick: () -> Unit
 ) {
 
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
 
