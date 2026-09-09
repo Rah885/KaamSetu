@@ -1,5 +1,6 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +42,14 @@ fun CustomerMainScreen() {
         mutableIntStateOf(0)
     }
 
+    var selectedService by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    var selectedWorker by remember {
+        mutableStateOf<WorkerProfileData?>(null)
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -48,6 +59,8 @@ fun CustomerMainScreen() {
                         selected = selectedIndex == index,
                         onClick = {
                             selectedIndex = index
+                            selectedService = null
+                            selectedWorker = null
                         },
                         icon = {
                             Text(
@@ -73,10 +86,70 @@ fun CustomerMainScreen() {
         ) {
 
             when (selectedIndex) {
+
                 0 -> CustomerHomeContent()
-                1 -> CustomerPlaceholderContent("सेवाएँ")
+
+                1 -> {
+
+                    when {
+                        selectedWorker != null -> {
+
+                            val worker = selectedWorker!!
+
+                            BackHandler {
+                                selectedWorker = null
+                            }
+
+                            WorkerDetailsScreen(
+                                workerName = worker.name,
+                                serviceName = worker.service,
+                                rating = worker.rating,
+                                distance = worker.distance,
+                                available = worker.available
+                            )
+                        }
+
+                        selectedService != null -> {
+
+                            BackHandler {
+                                selectedService = null
+                            }
+
+                            ServiceWorkersScreen(
+                                serviceName = selectedService!!,
+                                onWorkerClick = {
+                                        workerName,
+                                        workerService,
+                                        workerRating,
+                                        workerDistance,
+                                        workerAvailable ->
+
+                                    selectedWorker = WorkerProfileData(
+                                        name = workerName,
+                                        service = workerService,
+                                        rating = workerRating,
+                                        distance = workerDistance,
+                                        available = workerAvailable
+                                    )
+                                }
+                            )
+                        }
+
+                        else -> {
+
+                            ServicesScreen(
+                                onServiceClick = { serviceName ->
+                                    selectedService = serviceName
+                                }
+                            )
+                        }
+                    }
+                }
+
                 2 -> CustomerPlaceholderContent("मेरी रिक्वेस्ट")
+
                 3 -> CustomerPlaceholderContent("नोटिफिकेशन")
+
                 4 -> CustomerPlaceholderContent("प्रोफाइल")
             }
         }
