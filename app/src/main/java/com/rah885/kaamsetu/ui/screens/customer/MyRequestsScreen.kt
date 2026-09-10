@@ -33,7 +33,8 @@ private data class RequestItem(
 @Composable
 fun MyRequestsScreen(
     submittedRequests: List<ServiceRequestData> = emptyList(),
-    onRequestUpdated: (ServiceRequestData) -> Unit = {}
+    onRequestUpdated: (ServiceRequestData) -> Unit = {},
+    onPaymentClick: (ServiceRequestData) -> Unit = {}
 ) {
 
     val oldRequests = listOf(
@@ -109,7 +110,8 @@ fun MyRequestsScreen(
                     submittedRequest = submittedRequests.firstOrNull {
                         it.id == request.requestId
                     },
-                    onRequestUpdated = onRequestUpdated
+                    onRequestUpdated = onRequestUpdated,
+                    onPaymentClick = onPaymentClick
                 )
             }
         }
@@ -120,7 +122,8 @@ fun MyRequestsScreen(
 private fun RequestCard(
     request: RequestItem,
     submittedRequest: ServiceRequestData?,
-    onRequestUpdated: (ServiceRequestData) -> Unit
+    onRequestUpdated: (ServiceRequestData) -> Unit,
+    onPaymentClick: (ServiceRequestData) -> Unit
 ) {
 
     Card(
@@ -262,9 +265,46 @@ private fun RequestCard(
                 )
 
                 Text(
-                    text = "अब अगले चरण में भुगतान किया जा सकता है।",
+                    text = "अब भुगतान किया जा सकता है।",
                     modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                if (submittedRequest != null) {
+
+                    Button(
+                        onClick = {
+                            onPaymentClick(submittedRequest)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("💳 भुगतान करें")
+                    }
+                }
+            }
+
+            if (request.status == "भुगतान सफल") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "✅ भुगतान सफल हो गया।",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "💰 भुगतान राशि: ₹${request.price}",
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
