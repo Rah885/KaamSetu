@@ -51,8 +51,20 @@ fun AppNavigation() {
 
             CustomerMainScreen(
                 submittedRequests = serviceRequests,
+
                 onRequestSubmitted = { request ->
                     serviceRequests.add(request)
+                },
+
+                onRequestUpdated = { updatedRequest ->
+
+                    val index = serviceRequests.indexOfFirst {
+                        it.id == updatedRequest.id
+                    }
+
+                    if (index >= 0) {
+                        serviceRequests[index] = updatedRequest
+                    }
                 }
             )
         }
