@@ -294,8 +294,17 @@ private fun RequestCard(
                 )
 
                 Text(
-                    text = "✅ भुगतान सफल हो गया।",
+                    text = "💳 भुगतान सफल हो गया।",
                     style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "⏳ कामगार के काम शुरू करने का इंतजार है।",
+                    style = MaterialTheme.typography.bodyMedium
                 )
 
                 Spacer(
@@ -305,6 +314,69 @@ private fun RequestCard(
                 Text(
                     text = "💰 भुगतान राशि: ₹${request.price}",
                     style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            if (request.status == "काम शुरू किया") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "🟡 काम शुरू हो गया है।",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "कामगार ने आपका काम शुरू कर दिया है।",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            if (request.status == "काम चल रहा है") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "🔧 काम चल रहा है।",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "कामगार इस समय आपका काम कर रहा है।",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            if (request.status == "काम पूरा हुआ") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "✅ काम पूरा हो गया।",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "कामगार ने आपका काम पूरा कर दिया है।",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = "⭐ अगले चरण में आप कामगार को रेटिंग और रिव्यू दे सकेंगे।",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
