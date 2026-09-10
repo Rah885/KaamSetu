@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Modifier
+import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
 
 private data class WorkerNavItem(
     val title: String,
@@ -20,7 +21,10 @@ private data class WorkerNavItem(
 )
 
 @Composable
-fun WorkerMainScreen() {
+fun WorkerMainScreen(
+    serviceRequests: List<ServiceRequestData>,
+    onRequestUpdated: (ServiceRequestData) -> Unit
+) {
 
     val navItems = listOf(
         WorkerNavItem("Home", "🏠"),
@@ -71,7 +75,10 @@ fun WorkerMainScreen() {
 
                 0 -> WorkerDashboardScreen()
 
-                1 -> NewRequestsScreen()
+                1 -> NewRequestsScreen(
+                    serviceRequests = serviceRequests,
+                    onRequestUpdated = onRequestUpdated
+                )
 
                 2 -> MyJobsScreen()
 
