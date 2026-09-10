@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,12 +25,15 @@ private data class RequestItem(
     val location: String,
     val dateTime: String,
     val status: String,
-    val workerName: String = ""
+    val workerName: String = "",
+    val price: String = "",
+    val requestId: Long = 0L
 )
 
 @Composable
 fun MyRequestsScreen(
-    submittedRequests: List<ServiceRequestData> = emptyList()
+    submittedRequests: List<ServiceRequestData> = emptyList(),
+    onRequestUpdated: (ServiceRequestData) -> Unit = {}
 ) {
 
     val oldRequests = listOf(
@@ -64,7 +68,9 @@ fun MyRequestsScreen(
             location = request.location,
             dateTime = request.dateTime,
             status = request.status,
-            workerName = request.workerName
+            workerName = request.workerName,
+            price = request.price,
+            requestId = request.id
         )
     }
 
@@ -94,10 +100,16 @@ fun MyRequestsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            items(allRequests) { request ->
+            items(
+                items = allRequests
+            ) { request ->
 
                 RequestCard(
-                    request = request
+                    request = request,
+                    submittedRequest = submittedRequests.firstOrNull {
+                        it.id == request.requestId
+                    },
+                    onRequestUpdated = onRequestUpdated
                 )
             }
         }
@@ -106,7 +118,9 @@ fun MyRequestsScreen(
 
 @Composable
 private fun RequestCard(
-    request: RequestItem
+    request: RequestItem,
+    submittedRequest: ServiceRequestData?,
+    onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
 
     Card(
@@ -172,6 +186,87 @@ private fun RequestCard(
             Text(
                 text = "🕐 ${request.dateTime}"
             )
+
+            if (request.price.isNotBlank()) {
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                Text(
+                    text = "💰 कामगार की कीमत: ₹${request.price}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            if (
+                request.status == "कीमत बताई गई" &&
+                submittedRequest != null
+            ) {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "क्या आप इस कीमत पर काम करवाना चाहते हैं?",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Button(
+                    onClick = {
+
+                        onRequestUpdated(
+                            submittedRequest.copy(
+                                status = "कीमत स्वीकार की गई"
+                            )
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("✅ कीमत स्वीकार करें")
+                }
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Button(
+                    onClick = {
+
+                        onRequestUpdated(
+                            submittedRequest.copy(
+                                status = "कीमत अस्वीकार की गई"
+                            )
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("❌ कीमत अस्वीकार करें")
+                }
+            }
+
+            if (request.status == "कीमत स्वीकार की गई") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+                Text(
+                    text = "💳 कीमत स्वीकार हो गई।",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    text = "अब अगले चरण में भुगतान किया जा सकता है।",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
