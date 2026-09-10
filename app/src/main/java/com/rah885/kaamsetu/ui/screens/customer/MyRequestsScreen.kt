@@ -23,13 +23,16 @@ private data class RequestItem(
     val description: String,
     val location: String,
     val dateTime: String,
-    val status: String
+    val status: String,
+    val workerName: String = ""
 )
 
 @Composable
-fun MyRequestsScreen() {
+fun MyRequestsScreen(
+    submittedRequests: List<ServiceRequestData> = emptyList()
+) {
 
-    val requests = listOf(
+    val oldRequests = listOf(
         RequestItem(
             service = "इलेक्ट्रिशियन",
             description = "पंखा खराब है, चेक करवाना है",
@@ -52,6 +55,18 @@ fun MyRequestsScreen() {
             status = "रिक्वेस्ट भेजी गई"
         )
     )
+
+    val allRequests = oldRequests + submittedRequests.map { request ->
+
+        RequestItem(
+            service = request.service,
+            description = request.description,
+            location = request.location,
+            dateTime = request.dateTime,
+            status = request.status,
+            workerName = request.workerName
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -79,7 +94,7 @@ fun MyRequestsScreen() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            items(requests) { request ->
+            items(allRequests) { request ->
 
                 RequestCard(
                     request = request
@@ -124,6 +139,18 @@ private fun RequestCard(
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
+
+            if (request.workerName.isNotBlank()) {
+
+                Text(
+                    text = "👤 कामगार: ${request.workerName}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+            }
 
             Text(
                 text = request.description,
