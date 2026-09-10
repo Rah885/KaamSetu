@@ -26,7 +26,8 @@ private data class CustomerNavItem(
 @Composable
 fun CustomerMainScreen(
     submittedRequests: List<ServiceRequestData>,
-    onRequestSubmitted: (ServiceRequestData) -> Unit
+    onRequestSubmitted: (ServiceRequestData) -> Unit,
+    onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
 
     val navItems = listOf(
@@ -196,7 +197,8 @@ fun CustomerMainScreen(
                 2 -> {
 
                     MyRequestsScreen(
-                        submittedRequests = submittedRequests
+                        submittedRequests = submittedRequests,
+                        onRequestUpdated = onRequestUpdated
                     )
                 }
 
