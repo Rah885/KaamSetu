@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,6 +49,10 @@ fun CustomerMainScreen() {
 
     var showServiceRequest by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    val submittedRequests = remember {
+        mutableStateListOf<ServiceRequestData>()
     }
 
     Scaffold(
@@ -113,7 +118,18 @@ fun CustomerMainScreen() {
                                 showServiceRequest = false
                             }
 
-                            ServiceRequestScreen()
+                            ServiceRequestScreen(
+                                selectedService = selectedService ?: "",
+                                selectedWorker = selectedWorker?.name ?: "",
+
+                                onRequestSubmitted = { request ->
+
+                                    submittedRequests.add(request)
+
+                                    showServiceRequest = false
+                                    selectedWorker = null
+                                }
+                            )
                         }
 
                         selectedWorker != null -> {
@@ -130,6 +146,7 @@ fun CustomerMainScreen() {
                                 rating = worker.rating,
                                 distance = worker.distance,
                                 available = worker.available,
+
                                 onRequestClick = {
                                     showServiceRequest = true
                                 }
@@ -167,6 +184,7 @@ fun CustomerMainScreen() {
 
                             ServicesScreen(
                                 onServiceClick = { serviceName ->
+
                                     selectedService = serviceName
                                 }
                             )
@@ -178,7 +196,10 @@ fun CustomerMainScreen() {
                 // REQUESTS
                 // =========================
                 2 -> {
-                    MyRequestsScreen()
+
+                    MyRequestsScreen(
+                        submittedRequests = submittedRequests
+                    )
                 }
 
                 // =========================
