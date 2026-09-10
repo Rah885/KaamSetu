@@ -15,47 +15,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
-private data class ServiceRequestItem(
-    val customerName: String,
-    val service: String,
-    val description: String,
-    val location: String,
-    val dateTime: String
-)
+import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
 
 @Composable
-fun NewRequestsScreen() {
-
-    val requests = listOf(
-        ServiceRequestItem(
-            customerName = "राहुल कुमार",
-            service = "इलेक्ट्रिशियन",
-            description = "पंखा खराब है, चेक करवाना है",
-            location = "नेहरू नगर",
-            dateTime = "आज, शाम 5 बजे"
-        ),
-        ServiceRequestItem(
-            customerName = "अमित वर्मा",
-            service = "प्लंबर",
-            description = "नल से पानी लीक हो रहा है",
-            location = "जुनवानी",
-            dateTime = "कल, सुबह 10 बजे"
-        ),
-        ServiceRequestItem(
-            customerName = "संजय साहू",
-            service = "मैकेनिक",
-            description = "बाइक स्टार्ट नहीं हो रही",
-            location = "स्मृति नगर",
-            dateTime = "12 सितंबर, दोपहर 2 बजे"
-        )
-    )
+fun NewRequestsScreen(
+    serviceRequests: List<ServiceRequestData>,
+    onRequestUpdated: (ServiceRequestData) -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -78,16 +46,30 @@ fun NewRequestsScreen() {
             modifier = Modifier.height(16.dp)
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        if (serviceRequests.isEmpty()) {
 
-            items(requests) { request ->
+            Text(
+                text = "अभी कोई नई सर्विस रिक्वेस्ट नहीं है।",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-                RequestCard(
-                    request = request
-                )
+        } else {
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                items(
+                    items = serviceRequests,
+                    key = { request -> request.id }
+                ) { request ->
+
+                    RequestCard(
+                        request = request,
+                        onRequestUpdated = onRequestUpdated
+                    )
+                }
             }
         }
     }
@@ -95,12 +77,9 @@ fun NewRequestsScreen() {
 
 @Composable
 private fun RequestCard(
-    request: ServiceRequestItem
+    request: ServiceRequestData,
+    onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
-
-    var accepted by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -157,7 +136,16 @@ private fun RequestCard(
                 modifier = Modifier.height(12.dp)
             )
 
-            if (accepted) {
+            Text(
+                text = "📌 状态: ${request.status}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            if (request.status == "काम स्वीकार किया गया") {
 
                 Text(
                     text = "✅ रिक्वेस्ट स्वीकार की गई",
@@ -168,7 +156,12 @@ private fun RequestCard(
 
                 Button(
                     onClick = {
-                        accepted = true
+
+                        val updatedRequest = request.copy(
+                            status = "काम स्वीकार किया गया"
+                        )
+
+                        onRequestUpdated(updatedRequest)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
