@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 data class ServiceRequestData(
+    val id: Long = System.currentTimeMillis(),
     val service: String,
     val workerName: String,
     val customerName: String,
@@ -29,7 +30,8 @@ data class ServiceRequestData(
     val description: String,
     val location: String,
     val dateTime: String,
-    val status: String = "रिक्वेस्ट भेजी गई"
+    val status: String = "रिक्वेस्ट भेजी गई",
+    val price: String = ""
 )
 
 @Composable
