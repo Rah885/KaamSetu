@@ -31,7 +31,9 @@ data class ServiceRequestData(
     val location: String,
     val dateTime: String,
     val status: String = "रिक्वेस्ट भेजी गई",
-    val price: String = ""
+    val price: String = "",
+    val rating: Int = 0,
+    val review: String = ""
 )
 
 @Composable
