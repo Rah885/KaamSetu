@@ -46,6 +46,10 @@ fun CustomerMainScreen() {
         mutableStateOf<WorkerProfileData?>(null)
     }
 
+    var showServiceRequest by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -57,9 +61,9 @@ fun CustomerMainScreen() {
 
                         onClick = {
                             selectedIndex = index
-
                             selectedService = null
                             selectedWorker = null
+                            showServiceRequest = false
                         },
 
                         icon = {
@@ -90,9 +94,6 @@ fun CustomerMainScreen() {
 
                 // =========================
                 // HOME
-                // पुराना Home हटाया नहीं गया,
-                // बल्कि CustomerHomeScreen में
-                // पुराना + नया content है।
                 // =========================
                 0 -> {
                     CustomerHomeScreen()
@@ -100,11 +101,20 @@ fun CustomerMainScreen() {
 
                 // =========================
                 // SERVICES
-                // Services → Workers → Profile
+                // Services → Workers → Profile → Request
                 // =========================
                 1 -> {
 
                     when {
+
+                        showServiceRequest -> {
+
+                            BackHandler {
+                                showServiceRequest = false
+                            }
+
+                            ServiceRequestScreen()
+                        }
 
                         selectedWorker != null -> {
 
@@ -119,7 +129,10 @@ fun CustomerMainScreen() {
                                 serviceName = worker.service,
                                 rating = worker.rating,
                                 distance = worker.distance,
-                                available = worker.available
+                                available = worker.available,
+                                onRequestClick = {
+                                    showServiceRequest = true
+                                }
                             )
                         }
 
