@@ -159,6 +159,18 @@ private fun RequestCard(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            if (request.price.isNotBlank()) {
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = "💰 तय कीमत: ₹${request.price}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
             Spacer(
                 modifier = Modifier.height(12.dp)
             )
@@ -170,11 +182,11 @@ private fun RequestCard(
                     Button(
                         onClick = {
 
-                            val updatedRequest = request.copy(
-                                status = "काम स्वीकार किया गया"
+                            onRequestUpdated(
+                                request.copy(
+                                    status = "काम स्वीकार किया गया"
+                                )
                             )
-
-                            onRequestUpdated(updatedRequest)
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -266,12 +278,12 @@ private fun RequestCard(
 
                                 else -> {
 
-                                    val updatedRequest = request.copy(
-                                        price = price.toString(),
-                                        status = "कीमत बताई गई"
+                                    onRequestUpdated(
+                                        request.copy(
+                                            price = price.toString(),
+                                            status = "कीमत बताई गई"
+                                        )
                                     )
-
-                                    onRequestUpdated(updatedRequest)
 
                                     priceInput = ""
                                     priceError = ""
@@ -313,6 +325,132 @@ private fun RequestCard(
 
                     Text(
                         text = "💰 तय कीमत: ₹${request.price}"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "💳 ग्राहक का भुगतान पूरा होने का इंतजार है।"
+                    )
+                }
+
+                "भुगतान सफल" -> {
+
+                    Text(
+                        text = "💳 ग्राहक का भुगतान सफल हो गया है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "अब आप काम शुरू कर सकते हैं।"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Button(
+                        onClick = {
+
+                            onRequestUpdated(
+                                request.copy(
+                                    status = "काम शुरू किया"
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("▶️ काम शुरू करें")
+                    }
+                }
+
+                "काम शुरू किया" -> {
+
+                    Text(
+                        text = "🟡 काम शुरू हो गया है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "कामगार ने काम शुरू कर दिया है।"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Button(
+                        onClick = {
+
+                            onRequestUpdated(
+                                request.copy(
+                                    status = "काम चल रहा है"
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("🔧 काम चल रहा है")
+                    }
+                }
+
+                "काम चल रहा है" -> {
+
+                    Text(
+                        text = "🔧 काम चल रहा है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "काम पूरा होने के बाद नीचे बटन दबाएं।"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Button(
+                        onClick = {
+
+                            onRequestUpdated(
+                                request.copy(
+                                    status = "काम पूरा हुआ"
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("✅ काम पूरा करें")
+                    }
+                }
+
+                "काम पूरा हुआ" -> {
+
+                    Text(
+                        text = "✅ काम पूरा हो गया है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "अब ग्राहक रेटिंग और रिव्यू दे सकता है।"
                     )
                 }
 
