@@ -21,10 +21,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+data class ServiceRequestData(
+    val service: String,
+    val workerName: String,
+    val customerName: String,
+    val mobile: String,
+    val description: String,
+    val location: String,
+    val dateTime: String,
+    val status: String = "रिक्वेस्ट भेजी गई"
+)
+
 @Composable
-fun ServiceRequestScreen() {
+fun ServiceRequestScreen(
+    selectedService: String = "",
+    selectedWorker: String = "",
+    onRequestSubmitted: (ServiceRequestData) -> Unit = {}
+) {
 
     var service by rememberSaveable {
+        mutableStateOf(selectedService)
+    }
+
+    var customerName by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var mobile by rememberSaveable {
         mutableStateOf("")
     }
 
@@ -67,6 +90,18 @@ fun ServiceRequestScreen() {
             modifier = Modifier.height(20.dp)
         )
 
+        if (selectedWorker.isNotBlank()) {
+
+            Text(
+                text = "👤 कामगार: $selectedWorker",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+        }
+
         OutlinedTextField(
             value = service,
             onValueChange = {
@@ -78,6 +113,45 @@ fun ServiceRequestScreen() {
             },
             placeholder = {
                 Text("जैसे इलेक्ट्रिशियन, प्लंबर")
+            },
+            singleLine = true
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        OutlinedTextField(
+            value = customerName,
+            onValueChange = {
+                customerName = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("आपका नाम")
+            },
+            singleLine = true
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        OutlinedTextField(
+            value = mobile,
+            onValueChange = {
+                if (it.length <= 10) {
+                    mobile = it.filter { char ->
+                        char.isDigit()
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("मोबाइल नंबर")
+            },
+            placeholder = {
+                Text("10 अंकों का मोबाइल नंबर")
             },
             singleLine = true
         )
@@ -140,15 +214,39 @@ fun ServiceRequestScreen() {
         )
 
         Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Text(
+            text = "💰 भुगतान कामगार द्वारा कीमत तय होने के बाद होगा।",
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Spacer(
             modifier = Modifier.height(20.dp)
         )
 
         Button(
             onClick = {
+
+                val request = ServiceRequestData(
+                    service = service,
+                    workerName = selectedWorker,
+                    customerName = customerName,
+                    mobile = mobile,
+                    description = description,
+                    location = location,
+                    dateTime = dateTime
+                )
+
+                onRequestSubmitted(request)
+
                 requestSubmitted = true
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = service.isNotBlank() &&
+                    customerName.isNotBlank() &&
+                    mobile.length == 10 &&
                     description.isNotBlank() &&
                     location.isNotBlank()
         ) {
@@ -162,12 +260,12 @@ fun ServiceRequestScreen() {
             )
 
             Text(
-                text = "✅ आपकी सर्विस रिक्वेस्ट तैयार है।",
+                text = "✅ आपकी सर्विस रिक्वेस्ट भेज दी गई है।",
                 style = MaterialTheme.typography.titleMedium
             )
 
             Text(
-                text = "जल्द ही उपलब्ध कामगारों से मिलान किया जाएगा।",
+                text = "अब कामगार आपकी रिक्वेस्ट देख सकता है।",
                 modifier = Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
