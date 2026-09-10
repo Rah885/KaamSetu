@@ -10,14 +10,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
+
+private const val MIN_PRICE = 100
+private const val MAX_PRICE = 5000
 
 @Composable
 fun NewRequestsScreen(
@@ -37,7 +47,7 @@ fun NewRequestsScreen(
         )
 
         Text(
-            text = "अपने आसपास की नई रिक्वेस्ट देखें और काम स्वीकार करें।",
+            text = "रिक्वेस्ट स्वीकार करें और ग्राहक को उचित कीमत बताएं।",
             modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.bodyLarge
         )
@@ -80,6 +90,14 @@ private fun RequestCard(
     request: ServiceRequestData,
     onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
+
+    var priceInput by rememberSaveable(request.id) {
+        mutableStateOf("")
+    }
+
+    var priceError by rememberSaveable(request.id) {
+        mutableStateOf("")
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -137,7 +155,7 @@ private fun RequestCard(
             )
 
             Text(
-                text = "📌 状态: ${request.status}",
+                text = "📌 स्थिति: ${request.status}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -145,27 +163,165 @@ private fun RequestCard(
                 modifier = Modifier.height(12.dp)
             )
 
-            if (request.status == "काम स्वीकार किया गया") {
+            when (request.status) {
 
-                Text(
-                    text = "✅ रिक्वेस्ट स्वीकार की गई",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                "रिक्वेस्ट भेजी गई" -> {
 
-            } else {
+                    Button(
+                        onClick = {
 
-                Button(
-                    onClick = {
+                            val updatedRequest = request.copy(
+                                status = "काम स्वीकार किया गया"
+                            )
 
-                        val updatedRequest = request.copy(
-                            status = "काम स्वीकार किया गया"
+                            onRequestUpdated(updatedRequest)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("काम स्वीकार करें")
+                    }
+                }
+
+                "काम स्वीकार किया गया",
+                "कीमत अस्वीकार की गई" -> {
+
+                    Text(
+                        text = "💰 ग्राहक को अपनी कीमत बताएं",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "कीमत ₹$MIN_PRICE से ₹$MAX_PRICE के बीच रखें।",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = priceInput,
+                        onValueChange = {
+                            if (
+                                it.length <= 5 &&
+                                it.all { char -> char.isDigit() }
+                            ) {
+                                priceInput = it
+                                priceError = ""
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = {
+                            Text("काम की कीमत (₹)")
+                        },
+                        placeholder = {
+                            Text("जैसे 500")
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true
+                    )
+
+                    if (priceError.isNotBlank()) {
+
+                        Spacer(
+                            modifier = Modifier.height(4.dp)
                         )
 
-                        onRequestUpdated(updatedRequest)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("काम स्वीकार करें")
+                        Text(
+                            text = priceError,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
+                    )
+
+                    Button(
+                        onClick = {
+
+                            val price = priceInput.toIntOrNull()
+
+                            when {
+                                price == null -> {
+                                    priceError = "कृपया कीमत दर्ज करें।"
+                                }
+
+                                price < MIN_PRICE -> {
+                                    priceError =
+                                        "कम से कम ₹$MIN_PRICE कीमत रखें।"
+                                }
+
+                                price > MAX_PRICE -> {
+                                    priceError =
+                                        "अधिकतम ₹$MAX_PRICE कीमत रख सकते हैं।"
+                                }
+
+                                else -> {
+
+                                    val updatedRequest = request.copy(
+                                        price = price.toString(),
+                                        status = "कीमत बताई गई"
+                                    )
+
+                                    onRequestUpdated(updatedRequest)
+
+                                    priceInput = ""
+                                    priceError = ""
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("💰 कीमत भेजें")
+                    }
+                }
+
+                "कीमत बताई गई" -> {
+
+                    Text(
+                        text = "💰 ग्राहक के जवाब का इंतजार है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "बताई गई कीमत: ₹${request.price}"
+                    )
+                }
+
+                "कीमत स्वीकार की गई" -> {
+
+                    Text(
+                        text = "✅ ग्राहक ने कीमत स्वीकार कर ली है।",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "💰 तय कीमत: ₹${request.price}"
+                    )
+                }
+
+                else -> {
+
+                    Text(
+                        text = "ℹ️ ${request.status}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
                 }
             }
         }
