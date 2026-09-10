@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,7 +24,10 @@ private data class CustomerNavItem(
 )
 
 @Composable
-fun CustomerMainScreen() {
+fun CustomerMainScreen(
+    submittedRequests: List<ServiceRequestData> = emptyList(),
+    onRequestSubmitted: (ServiceRequestData) -> Unit = {}
+) {
 
     val navItems = listOf(
         CustomerNavItem("Home", "⌂"),
@@ -49,10 +51,6 @@ fun CustomerMainScreen() {
 
     var showServiceRequest by rememberSaveable {
         mutableStateOf(false)
-    }
-
-    val submittedRequests = remember {
-        mutableStateListOf<ServiceRequestData>()
     }
 
     Scaffold(
@@ -124,7 +122,7 @@ fun CustomerMainScreen() {
 
                                 onRequestSubmitted = { request ->
 
-                                    submittedRequests.add(request)
+                                    onRequestSubmitted(request)
 
                                     showServiceRequest = false
                                     selectedWorker = null
