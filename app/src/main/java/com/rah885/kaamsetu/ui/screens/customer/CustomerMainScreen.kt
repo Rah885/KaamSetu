@@ -25,8 +25,8 @@ private data class CustomerNavItem(
 
 @Composable
 fun CustomerMainScreen(
-    submittedRequests: List<ServiceRequestData> = emptyList(),
-    onRequestSubmitted: (ServiceRequestData) -> Unit = {}
+    submittedRequests: List<ServiceRequestData>,
+    onRequestSubmitted: (ServiceRequestData) -> Unit
 ) {
 
     val navItems = listOf(
