@@ -1,5 +1,6 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,7 +32,9 @@ private data class RequestItem(
     val status: String,
     val workerName: String = "",
     val price: String = "",
-    val requestId: Long = 0L
+    val requestId: Long = 0L,
+    val rating: Int = 0,
+    val review: String = ""
 )
 
 @Composable
@@ -36,6 +43,38 @@ fun MyRequestsScreen(
     onRequestUpdated: (ServiceRequestData) -> Unit = {},
     onPaymentClick: (ServiceRequestData) -> Unit = {}
 ) {
+
+    var selectedRatingRequest by remember {
+        mutableStateOf<ServiceRequestData?>(null)
+    }
+
+    if (selectedRatingRequest != null) {
+
+        BackHandler {
+            selectedRatingRequest = null
+        }
+
+        RatingReviewScreen(
+            workerName = selectedRatingRequest!!.workerName,
+            onSubmit = { rating, review ->
+
+                val updatedRequest = selectedRatingRequest!!.copy(
+                    rating = rating,
+                    review = review,
+                    status = "रेटिंग और रिव्यू दिया गया"
+                )
+
+                onRequestUpdated(updatedRequest)
+
+                selectedRatingRequest = null
+            },
+            onBack = {
+                selectedRatingRequest = null
+            }
+        )
+
+        return
+    }
 
     val oldRequests = listOf(
         RequestItem(
@@ -71,7 +110,9 @@ fun MyRequestsScreen(
             status = request.status,
             workerName = request.workerName,
             price = request.price,
-            requestId = request.id
+            requestId = request.id,
+            rating = request.rating,
+            review = request.review
         )
     }
 
@@ -111,7 +152,8 @@ fun MyRequestsScreen(
                         it.id == request.requestId
                     },
                     onRequestUpdated = onRequestUpdated,
-                    onPaymentClick = onPaymentClick
+                    onPaymentClick = onPaymentClick,
+                    onRatingClick = { selectedRatingRequest = it }
                 )
             }
         }
@@ -123,7 +165,8 @@ private fun RequestCard(
     request: RequestItem,
     submittedRequest: ServiceRequestData?,
     onRequestUpdated: (ServiceRequestData) -> Unit,
-    onPaymentClick: (ServiceRequestData) -> Unit
+    onPaymentClick: (ServiceRequestData) -> Unit,
+    onRatingClick: (ServiceRequestData) -> Unit
 ) {
 
     Card(
@@ -374,8 +417,48 @@ private fun RequestCard(
                     modifier = Modifier.height(8.dp)
                 )
 
+                if (submittedRequest != null) {
+
+                    Button(
+                        onClick = {
+                            onRatingClick(submittedRequest)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("⭐ रेटिंग और रिव्यू दें")
+                    }
+                }
+            }
+
+            if (request.status == "रेटिंग और रिव्यू दिया गया") {
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
                 Text(
-                    text = "⭐ अगले चरण में आप कामगार को रेटिंग और रिव्यू दे सकेंगे।",
+                    text = "⭐ आपकी रेटिंग: ${request.rating}/5",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                if (request.review.isNotBlank()) {
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "📝 आपका रिव्यू: ${request.review}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+                    text = "✅ रेटिंग और रिव्यू सफलतापूर्वक सेव हो गया।",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
