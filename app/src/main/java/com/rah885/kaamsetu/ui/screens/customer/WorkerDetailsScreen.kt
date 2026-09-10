@@ -22,7 +22,8 @@ fun WorkerDetailsScreen(
     serviceName: String,
     rating: String,
     distance: String,
-    available: Boolean
+    available: Boolean,
+    onRequestClick: () -> Unit = {}
 ) {
 
     Column(
@@ -96,9 +97,7 @@ fun WorkerDetailsScreen(
         )
 
         Button(
-            onClick = {
-                // आगे चलकर यहाँ Service Request खुलेगा
-            },
+            onClick = onRequestClick,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("काम के लिए रिक्वेस्ट भेजें")
