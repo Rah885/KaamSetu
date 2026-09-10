@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rah885.kaamsetu.ui.screens.customer.CustomerMainScreen
+import com.rah885.kaamsetu.ui.screens.customer.PaymentData
 import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
 import com.rah885.kaamsetu.ui.screens.home.HomeScreen
 import com.rah885.kaamsetu.ui.screens.worker.WorkerMainScreen
@@ -28,6 +29,14 @@ fun AppNavigation() {
      */
     val serviceRequests = remember {
         mutableStateListOf<ServiceRequestData>()
+    }
+
+    /*
+     * Customer के सभी successful payments की
+     * temporary in-memory history.
+     */
+    val payments = remember {
+        mutableStateListOf<PaymentData>()
     }
 
     NavHost(
@@ -65,6 +74,25 @@ fun AppNavigation() {
                     if (index >= 0) {
                         serviceRequests[index] = updatedRequest
                     }
+                },
+
+                payments = payments,
+
+                onPaymentSuccess = { payment ->
+
+                    payments.add(payment)
+
+                    val requestIndex = serviceRequests.indexOfFirst {
+                        it.id == payment.requestId
+                    }
+
+                    if (requestIndex >= 0) {
+
+                        serviceRequests[requestIndex] =
+                            serviceRequests[requestIndex].copy(
+                                status = "भुगतान सफल"
+                            )
+                    }
                 }
             )
         }
@@ -73,6 +101,7 @@ fun AppNavigation() {
 
             WorkerMainScreen(
                 serviceRequests = serviceRequests,
+
                 onRequestUpdated = { updatedRequest ->
 
                     val index = serviceRequests.indexOfFirst {
