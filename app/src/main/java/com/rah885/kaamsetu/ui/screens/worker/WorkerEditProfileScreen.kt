@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,7 +49,6 @@ fun WorkerEditProfileScreen(
         photoUri: String?
     ) -> Unit
 ) {
-
     var name by rememberSaveable {
         mutableStateOf(initialName)
     }
@@ -107,22 +105,6 @@ fun WorkerEditProfileScreen(
                 null
             }
         }
-    }
-
-    LaunchedEffect(
-        initialName,
-        initialMobile,
-        initialService,
-        initialAddress,
-        initialCity,
-        initialPhotoUri
-    ) {
-        name = initialName
-        mobile = initialMobile
-        service = initialService
-        address = initialAddress
-        city = initialCity
-        photoUri = initialPhotoUri
     }
 
     Column(
@@ -216,10 +198,12 @@ fun WorkerEditProfileScreen(
         OutlinedTextField(
             value = mobile,
             onValueChange = {
-                if (it.length <= 10) {
-                    mobile = it.filter { char ->
-                        char.isDigit()
-                    }
+                val digitsOnly = it.filter { char ->
+                    char.isDigit()
+                }
+
+                if (digitsOnly.length <= 10) {
+                    mobile = digitsOnly
                     saved = false
                 }
             },
@@ -293,7 +277,6 @@ fun WorkerEditProfileScreen(
 
         Button(
             onClick = {
-
                 onSave(
                     name,
                     mobile,
@@ -316,7 +299,6 @@ fun WorkerEditProfileScreen(
         }
 
         if (saved) {
-
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
