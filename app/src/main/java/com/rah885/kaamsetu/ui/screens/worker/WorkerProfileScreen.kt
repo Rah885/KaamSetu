@@ -39,7 +39,6 @@ fun WorkerProfileScreen(
     onHelpClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
-
     val context = LocalContext.current
 
     val profileBitmap = remember(photoUri) {
@@ -66,7 +65,6 @@ fun WorkerProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "कामगार प्रोफाइल",
             style = MaterialTheme.typography.headlineMedium
@@ -79,7 +77,6 @@ fun WorkerProfileScreen(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,7 +85,6 @@ fun WorkerProfileScreen(
             ) {
 
                 if (profileBitmap != null) {
-
                     Image(
                         bitmap = profileBitmap.asImageBitmap(),
                         contentDescription = "प्रोफाइल फोटो",
@@ -96,9 +92,7 @@ fun WorkerProfileScreen(
                             .size(110.dp)
                             .clip(CircleShape)
                     )
-
                 } else {
-
                     Text(
                         text = "👷",
                         style = MaterialTheme.typography.displaySmall
@@ -149,7 +143,7 @@ fun WorkerProfileScreen(
                 )
 
                 Text(
-                    text = "⭐ 4.8  •  🔧 18 काम पूरे",
+                    text = "⭐ 4.8 • 🔧 18 काम पूरे",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -204,21 +198,16 @@ private fun ProfileOption(
     icon: String,
     onClick: () -> Unit
 ) {
-
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Text(
-                text = icon
-            )
+            Text(icon)
 
             Text(
                 text = title,
