@@ -40,20 +40,37 @@ fun WorkerMainScreen(
         mutableIntStateOf(0)
     }
 
-    /*
-     * Worker Profile के अंदर की screens
-     */
     var profileSubScreen by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    var profileName by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileMobile by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileService by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileAddress by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileCity by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profilePhotoUri by rememberSaveable {
         mutableStateOf<String?>(null)
     }
 
     Scaffold(
         bottomBar = {
 
-            /*
-             * Profile के अंदर कोई screen खुली हो
-             * तो नीचे NavigationBar छिपेगी।
-             */
             if (profileSubScreen == null) {
 
                 NavigationBar {
@@ -69,15 +86,11 @@ fun WorkerMainScreen(
                             },
 
                             icon = {
-                                Text(
-                                    text = item.iconText
-                                )
+                                Text(item.iconText)
                             },
 
                             label = {
-                                Text(
-                                    text = item.title
-                                )
+                                Text(item.title)
                             }
                         )
                     }
@@ -92,9 +105,6 @@ fun WorkerMainScreen(
                 .padding(innerPadding)
         ) {
 
-            /*
-             * Profile के अंदर की screens
-             */
             when (profileSubScreen) {
 
                 "edit_profile" -> {
@@ -103,7 +113,26 @@ fun WorkerMainScreen(
                         profileSubScreen = null
                     }
 
-                    WorkerEditProfileScreen()
+                    WorkerEditProfileScreen(
+                        initialName = profileName,
+                        initialMobile = profileMobile,
+                        initialService = profileService,
+                        initialAddress = profileAddress,
+                        initialCity = profileCity,
+                        initialPhotoUri = profilePhotoUri,
+
+                        onSave = { name, mobile, service, address, city, photoUri ->
+
+                            profileName = name
+                            profileMobile = mobile
+                            profileService = service
+                            profileAddress = address
+                            profileCity = city
+                            profilePhotoUri = photoUri
+
+                            profileSubScreen = null
+                        }
+                    )
                 }
 
                 "settings" -> {
@@ -126,9 +155,6 @@ fun WorkerMainScreen(
 
                 else -> {
 
-                    /*
-                     * Existing Worker screens
-                     */
                     when (selectedIndex) {
 
                         0 -> {
@@ -153,6 +179,12 @@ fun WorkerMainScreen(
                         4 -> {
 
                             WorkerProfileScreen(
+                                name = profileName,
+                                mobile = profileMobile,
+                                service = profileService,
+                                address = profileAddress,
+                                city = profileCity,
+                                photoUri = profilePhotoUri,
 
                                 onEditProfileClick = {
                                     profileSubScreen = "edit_profile"
@@ -167,15 +199,6 @@ fun WorkerMainScreen(
                                 },
 
                                 onLogoutClick = {
-
-                                    /*
-                                     * अभी Login/Auth system नहीं है।
-                                     * इसलिए Logout फिलहाल Worker Home
-                                     * पर वापस ले जाएगा।
-                                     *
-                                     * बाद में proper Login/Sign Up/Auth
-                                     * जुड़ने पर यही जगह real logout होगी।
-                                     */
                                     profileSubScreen = null
                                     selectedIndex = 0
                                 }
