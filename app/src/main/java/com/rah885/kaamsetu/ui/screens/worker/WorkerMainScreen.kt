@@ -27,7 +27,6 @@ fun WorkerMainScreen(
     serviceRequests: List<ServiceRequestData>,
     onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
-
     val navItems = listOf(
         WorkerNavItem("Home", "🏠"),
         WorkerNavItem("Requests", "📋"),
@@ -44,6 +43,7 @@ fun WorkerMainScreen(
         mutableStateOf<String?>(null)
     }
 
+    // Worker profile data
     var profileName by rememberSaveable {
         mutableStateOf("")
     }
@@ -70,25 +70,18 @@ fun WorkerMainScreen(
 
     Scaffold(
         bottomBar = {
-
             if (profileSubScreen == null) {
-
                 NavigationBar {
-
                     navItems.forEachIndexed { index, item ->
-
                         NavigationBarItem(
                             selected = selectedIndex == index,
-
                             onClick = {
                                 selectedIndex = index
                                 profileSubScreen = null
                             },
-
                             icon = {
                                 Text(item.iconText)
                             },
-
                             label = {
                                 Text(item.title)
                             }
@@ -108,7 +101,6 @@ fun WorkerMainScreen(
             when (profileSubScreen) {
 
                 "edit_profile" -> {
-
                     BackHandler {
                         profileSubScreen = null
                     }
@@ -120,7 +112,6 @@ fun WorkerMainScreen(
                         initialAddress = profileAddress,
                         initialCity = profileCity,
                         initialPhotoUri = profilePhotoUri,
-
                         onSave = { name, mobile, service, address, city, photoUri ->
 
                             profileName = name
@@ -136,7 +127,6 @@ fun WorkerMainScreen(
                 }
 
                 "settings" -> {
-
                     BackHandler {
                         profileSubScreen = null
                     }
@@ -145,7 +135,6 @@ fun WorkerMainScreen(
                 }
 
                 "help" -> {
-
                     BackHandler {
                         profileSubScreen = null
                     }
@@ -177,7 +166,6 @@ fun WorkerMainScreen(
                         }
 
                         4 -> {
-
                             WorkerProfileScreen(
                                 name = profileName,
                                 mobile = profileMobile,
