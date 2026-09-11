@@ -62,6 +62,32 @@ fun CustomerMainScreen(
     }
 
     /*
+     * =========================
+     * PROFILE DATA
+     * =========================
+     */
+
+    var profileName by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileMobile by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileAddress by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profileCity by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var profilePhotoUri by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    /*
      * Profile के अंदर की screens
      */
     var profileSubScreen by rememberSaveable {
@@ -134,7 +160,29 @@ fun CustomerMainScreen(
                         profileSubScreen = null
                     }
 
-                    EditProfileScreen()
+                    EditProfileScreen(
+                        initialName = profileName,
+                        initialMobile = profileMobile,
+                        initialAddress = profileAddress,
+                        initialCity = profileCity,
+                        initialPhotoUri = profilePhotoUri,
+
+                        onSave = {
+                                name,
+                                mobile,
+                                address,
+                                city,
+                                photoUri ->
+
+                            profileName = name
+                            profileMobile = mobile
+                            profileAddress = address
+                            profileCity = city
+                            profilePhotoUri = photoUri
+
+                            profileSubScreen = null
+                        }
+                    )
                 }
 
                 "settings" -> {
@@ -349,6 +397,11 @@ fun CustomerMainScreen(
                             5 -> {
 
                                 ProfileScreen(
+                                    name = profileName,
+                                    mobile = profileMobile,
+                                    address = profileAddress,
+                                    city = profileCity,
+                                    photoUri = profilePhotoUri,
 
                                     onEditProfileClick = {
 
