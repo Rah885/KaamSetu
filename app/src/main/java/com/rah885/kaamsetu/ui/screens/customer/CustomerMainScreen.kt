@@ -61,35 +61,53 @@ fun CustomerMainScreen(
         mutableStateOf<ServiceRequestData?>(null)
     }
 
+    /*
+     * Profile के अंदर की screens
+     */
+    var profileSubScreen by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
     Scaffold(
         bottomBar = {
-            NavigationBar {
 
-                navItems.forEachIndexed { index, item ->
+            /*
+             * जब Profile के अंदर कोई screen खुली हो,
+             * तब नीचे की navigation bar छिपा देंगे।
+             */
+            if (profileSubScreen == null) {
 
-                    NavigationBarItem(
-                        selected = selectedIndex == index,
+                NavigationBar {
 
-                        onClick = {
-                            selectedIndex = index
-                            selectedService = null
-                            selectedWorker = null
-                            showServiceRequest = false
-                            selectedPaymentRequest = null
-                        },
+                    navItems.forEachIndexed { index, item ->
 
-                        icon = {
-                            Text(
-                                text = item.iconText
-                            )
-                        },
+                        NavigationBarItem(
+                            selected = selectedIndex == index,
 
-                        label = {
-                            Text(
-                                text = item.title
-                            )
-                        }
-                    )
+                            onClick = {
+
+                                selectedIndex = index
+
+                                selectedService = null
+                                selectedWorker = null
+                                showServiceRequest = false
+                                selectedPaymentRequest = null
+                                profileSubScreen = null
+                            },
+
+                            icon = {
+                                Text(
+                                    text = item.iconText
+                                )
+                            },
+
+                            label = {
+                                Text(
+                                    text = item.title
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -102,140 +120,273 @@ fun CustomerMainScreen(
             contentAlignment = Alignment.Center
         ) {
 
-            if (selectedPaymentRequest != null) {
+            /*
+             * =========================
+             * PROFILE SUB SCREENS
+             * =========================
+             */
 
-                PaymentScreen(
-                    request = selectedPaymentRequest!!,
+            when (profileSubScreen) {
 
-                    onPaymentSuccess = { payment ->
+                "edit_profile" -> {
 
-                        onPaymentSuccess(payment)
-
-                        selectedPaymentRequest = null
-                    },
-
-                    onBack = {
-                        selectedPaymentRequest = null
-                    }
-                )
-
-            } else {
-
-                when (selectedIndex) {
-
-                    0 -> {
-                        CustomerHomeScreen()
+                    BackHandler {
+                        profileSubScreen = null
                     }
 
-                    1 -> {
+                    EditProfileScreen()
+                }
 
-                        when {
+                "settings" -> {
 
-                            showServiceRequest -> {
+                    BackHandler {
+                        profileSubScreen = null
+                    }
 
-                                BackHandler {
-                                    showServiceRequest = false
-                                }
+                    SettingsScreen()
+                }
 
-                                ServiceRequestScreen(
-                                    selectedService = selectedService ?: "",
-                                    selectedWorker = selectedWorker?.name ?: "",
+                "help" -> {
 
-                                    onRequestSubmitted = { request ->
+                    BackHandler {
+                        profileSubScreen = null
+                    }
 
-                                        onRequestSubmitted(request)
+                    HelpSupportScreen()
+                }
 
-                                        showServiceRequest = false
-                                        selectedWorker = null
-                                    }
-                                )
+                else -> {
+
+                    /*
+                     * =========================
+                     * PAYMENT SCREEN
+                     * =========================
+                     */
+
+                    if (selectedPaymentRequest != null) {
+
+                        PaymentScreen(
+                            request = selectedPaymentRequest!!,
+
+                            onPaymentSuccess = { payment ->
+
+                                onPaymentSuccess(payment)
+
+                                selectedPaymentRequest = null
+                            },
+
+                            onBack = {
+                                selectedPaymentRequest = null
+                            }
+                        )
+
+                    } else {
+
+                        /*
+                         * =========================
+                         * MAIN CUSTOMER SCREENS
+                         * =========================
+                         */
+
+                        when (selectedIndex) {
+
+                            /*
+                             * =========================
+                             * HOME
+                             * =========================
+                             */
+
+                            0 -> {
+
+                                CustomerHomeScreen()
                             }
 
-                            selectedWorker != null -> {
+                            /*
+                             * =========================
+                             * SERVICES
+                             * =========================
+                             */
 
-                                val worker = selectedWorker!!
+                            1 -> {
 
-                                BackHandler {
-                                    selectedWorker = null
-                                }
+                                when {
 
-                                WorkerDetailsScreen(
-                                    workerName = worker.name,
-                                    serviceName = worker.service,
-                                    rating = worker.rating,
-                                    distance = worker.distance,
-                                    available = worker.available,
+                                    showServiceRequest -> {
 
-                                    onRequestClick = {
-                                        showServiceRequest = true
-                                    }
-                                )
-                            }
+                                        BackHandler {
 
-                            selectedService != null -> {
+                                            showServiceRequest = false
+                                        }
 
-                                BackHandler {
-                                    selectedService = null
-                                }
+                                        ServiceRequestScreen(
+                                            selectedService = selectedService ?: "",
+                                            selectedWorker = selectedWorker?.name ?: "",
 
-                                ServiceWorkersScreen(
-                                    serviceName = selectedService!!,
+                                            onRequestSubmitted = { request ->
 
-                                    onWorkerClick = {
-                                            workerName,
-                                            workerService,
-                                            workerRating,
-                                            workerDistance,
-                                            workerAvailable ->
+                                                onRequestSubmitted(request)
 
-                                        selectedWorker = WorkerProfileData(
-                                            name = workerName,
-                                            service = workerService,
-                                            rating = workerRating,
-                                            distance = workerDistance,
-                                            available = workerAvailable
+                                                showServiceRequest = false
+                                                selectedWorker = null
+                                            }
                                         )
                                     }
+
+                                    selectedWorker != null -> {
+
+                                        val worker = selectedWorker!!
+
+                                        BackHandler {
+
+                                            selectedWorker = null
+                                        }
+
+                                        WorkerDetailsScreen(
+                                            workerName = worker.name,
+                                            serviceName = worker.service,
+                                            rating = worker.rating,
+                                            distance = worker.distance,
+                                            available = worker.available,
+
+                                            onRequestClick = {
+
+                                                showServiceRequest = true
+                                            }
+                                        )
+                                    }
+
+                                    selectedService != null -> {
+
+                                        BackHandler {
+
+                                            selectedService = null
+                                        }
+
+                                        ServiceWorkersScreen(
+                                            serviceName = selectedService!!,
+
+                                            onWorkerClick = {
+                                                    workerName,
+                                                    workerService,
+                                                    workerRating,
+                                                    workerDistance,
+                                                    workerAvailable ->
+
+                                                selectedWorker =
+                                                    WorkerProfileData(
+                                                        name = workerName,
+                                                        service = workerService,
+                                                        rating = workerRating,
+                                                        distance = workerDistance,
+                                                        available = workerAvailable
+                                                    )
+                                            }
+                                        )
+                                    }
+
+                                    else -> {
+
+                                        ServicesScreen(
+                                            onServiceClick = { serviceName ->
+
+                                                selectedService = serviceName
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+
+                            /*
+                             * =========================
+                             * REQUESTS
+                             * =========================
+                             */
+
+                            2 -> {
+
+                                MyRequestsScreen(
+                                    submittedRequests = submittedRequests,
+
+                                    onRequestUpdated = onRequestUpdated,
+
+                                    onPaymentClick = { request ->
+
+                                        selectedPaymentRequest = request
+                                    }
                                 )
                             }
 
-                            else -> {
+                            /*
+                             * =========================
+                             * ALERTS
+                             * =========================
+                             */
 
-                                ServicesScreen(
-                                    onServiceClick = { serviceName ->
+                            3 -> {
 
-                                        selectedService = serviceName
+                                NotificationsScreen()
+                            }
+
+                            /*
+                             * =========================
+                             * PAYMENTS
+                             * =========================
+                             */
+
+                            4 -> {
+
+                                PaymentHistoryScreen(
+                                    payments = payments
+                                )
+                            }
+
+                            /*
+                             * =========================
+                             * PROFILE
+                             * =========================
+                             */
+
+                            5 -> {
+
+                                ProfileScreen(
+
+                                    onEditProfileClick = {
+
+                                        profileSubScreen = "edit_profile"
+                                    },
+
+                                    onSettingsClick = {
+
+                                        profileSubScreen = "settings"
+                                    },
+
+                                    onHelpClick = {
+
+                                        profileSubScreen = "help"
+                                    },
+
+                                    onLogoutClick = {
+
+                                        /*
+                                         * अभी Login/Auth system नहीं है।
+                                         * इसलिए Logout फिलहाल Customer Home पर
+                                         * वापस ले जाएगा।
+                                         *
+                                         * असली Login/Sign Up बनने के बाद
+                                         * यही जगह proper logout से जुड़ेगी।
+                                         */
+
+                                        profileSubScreen = null
+                                        selectedIndex = 0
+
+                                        selectedService = null
+                                        selectedWorker = null
+                                        showServiceRequest = false
+                                        selectedPaymentRequest = null
                                     }
                                 )
                             }
                         }
-                    }
-
-                    2 -> {
-
-                        MyRequestsScreen(
-                            submittedRequests = submittedRequests,
-                            onRequestUpdated = onRequestUpdated,
-
-                            onPaymentClick = { request ->
-                                selectedPaymentRequest = request
-                            }
-                        )
-                    }
-
-                    3 -> {
-                        NotificationsScreen()
-                    }
-
-                    4 -> {
-
-                        PaymentHistoryScreen(
-                            payments = payments
-                        )
-                    }
-
-                    5 -> {
-                        ProfileScreen()
                     }
                 }
             }
