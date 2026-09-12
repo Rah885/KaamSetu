@@ -33,6 +33,7 @@ fun ProfileScreen(
     address: String = "",
     city: String = "",
     photoUri: String? = null,
+    onAccountClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onHelpClick: () -> Unit = {},
@@ -64,6 +65,7 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
             text = "प्रोफाइल",
             style = MaterialTheme.typography.headlineMedium
@@ -76,13 +78,16 @@ fun ProfileScreen(
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 if (profileBitmap != null) {
+
                     Image(
                         bitmap = profileBitmap.asImageBitmap(),
                         contentDescription = "प्रोफाइल फोटो",
@@ -90,7 +95,9 @@ fun ProfileScreen(
                             .size(110.dp)
                             .clip(CircleShape)
                     )
+
                 } else {
+
                     Text(
                         text = "👤",
                         style = MaterialTheme.typography.displaySmall
@@ -107,6 +114,7 @@ fun ProfileScreen(
                 )
 
                 if (mobile.isNotBlank()) {
+
                     Text(
                         text = "📱 $mobile",
                         modifier = Modifier.padding(top = 4.dp),
@@ -115,6 +123,7 @@ fun ProfileScreen(
                 }
 
                 if (address.isNotBlank()) {
+
                     Text(
                         text = "📍 $address",
                         modifier = Modifier.padding(top = 4.dp),
@@ -123,6 +132,7 @@ fun ProfileScreen(
                 }
 
                 if (city.isNotBlank()) {
+
                     Text(
                         text = "🏙️ $city",
                         modifier = Modifier.padding(top = 4.dp),
@@ -140,6 +150,16 @@ fun ProfileScreen(
 
         Spacer(
             modifier = Modifier.height(20.dp)
+        )
+
+        ProfileOption(
+            title = "मेरा Customer Account",
+            icon = "👤",
+            onClick = onAccountClick
+        )
+
+        Spacer(
+            modifier = Modifier.height(10.dp)
         )
 
         ProfileOption(
@@ -191,11 +211,13 @@ private fun ProfileOption(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Text(icon)
 
             Text(
