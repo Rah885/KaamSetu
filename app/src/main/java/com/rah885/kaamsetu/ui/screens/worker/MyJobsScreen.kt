@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
 
 private data class JobItem(
     val customerName: String,
@@ -27,34 +28,31 @@ private data class JobItem(
 )
 
 @Composable
-fun MyJobsScreen() {
+fun MyJobsScreen(
+    serviceRequests: List<ServiceRequestData>
+) {
 
-    val jobs = listOf(
-        JobItem(
-            customerName = "राहुल कुमार",
-            service = "इलेक्ट्रिशियन",
-            description = "पंखे की वायरिंग और खराबी चेक करनी है",
-            location = "नेहरू नगर",
-            dateTime = "आज, शाम 5 बजे",
-            status = "चल रहा है"
-        ),
-        JobItem(
-            customerName = "अमित वर्मा",
-            service = "प्लंबर",
-            description = "बाथरूम के नल की लीकेज ठीक करनी है",
-            location = "जुनवानी",
-            dateTime = "कल, सुबह 10 बजे",
-            status = "स्वीकार किया गया"
-        ),
-        JobItem(
-            customerName = "संजय साहू",
-            service = "मैकेनिक",
-            description = "बाइक की सर्विस और इंजन चेक करना है",
-            location = "स्मृति नगर",
-            dateTime = "12 सितंबर, दोपहर 2 बजे",
-            status = "पूरा हुआ"
-        )
-    )
+    /*
+     * केवल वही requests दिखेंगी जिन्हें worker ने
+     * accept किया है या जिनका काम आगे बढ़ चुका है।
+     *
+     * "रिक्वेस्ट भेजी गई" अभी worker द्वारा accept नहीं हुई,
+     * इसलिए वह My Jobs में नहीं आएगी।
+     */
+    val jobs = serviceRequests
+        .filter { request ->
+            request.status != "रिक्वेस्ट भेजी गई"
+        }
+        .map { request ->
+            JobItem(
+                customerName = request.customerName,
+                service = request.service,
+                description = request.description,
+                location = request.location,
+                dateTime = request.dateTime,
+                status = request.status
+            )
+        }
 
     Column(
         modifier = Modifier
