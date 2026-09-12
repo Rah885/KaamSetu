@@ -88,20 +88,9 @@ fun CustomerMainScreen(
     }
 
     /*
-     * =========================
-     * CUSTOMER ACCOUNT
-     * =========================
-     */
-
-    var customerId by rememberSaveable {
-        mutableStateOf(
-            "KS-C-${System.currentTimeMillis()}"
-        )
-    }
-
-    /*
      * Profile के अंदर की screens
      */
+
     var profileSubScreen by rememberSaveable {
         mutableStateOf<String?>(null)
     }
@@ -113,6 +102,7 @@ fun CustomerMainScreen(
              * जब Profile के अंदर कोई screen खुली हो,
              * तब नीचे की navigation bar छिपा देंगे।
              */
+
             if (profileSubScreen == null) {
 
                 NavigationBar {
@@ -166,35 +156,6 @@ fun CustomerMainScreen(
 
             when (profileSubScreen) {
 
-                /*
-                 * =========================
-                 * CUSTOMER ACCOUNT
-                 * =========================
-                 */
-
-                "customer_account" -> {
-
-                    BackHandler {
-                        profileSubScreen = null
-                    }
-
-                    CustomerAccountScreen(
-                        customerId = customerId,
-                        name = profileName,
-                        mobile = profileMobile,
-
-                        onBack = {
-                            profileSubScreen = null
-                        }
-                    )
-                }
-
-                /*
-                 * =========================
-                 * EDIT PROFILE
-                 * =========================
-                 */
-
                 "edit_profile" -> {
 
                     BackHandler {
@@ -226,12 +187,6 @@ fun CustomerMainScreen(
                     )
                 }
 
-                /*
-                 * =========================
-                 * SETTINGS
-                 * =========================
-                 */
-
                 "settings" -> {
 
                     BackHandler {
@@ -240,12 +195,6 @@ fun CustomerMainScreen(
 
                     SettingsScreen()
                 }
-
-                /*
-                 * =========================
-                 * HELP
-                 * =========================
-                 */
 
                 "help" -> {
 
@@ -315,7 +264,6 @@ fun CustomerMainScreen(
                                     showServiceRequest -> {
 
                                         BackHandler {
-
                                             showServiceRequest = false
                                         }
 
@@ -338,7 +286,6 @@ fun CustomerMainScreen(
                                         val worker = selectedWorker!!
 
                                         BackHandler {
-
                                             selectedWorker = null
                                         }
 
@@ -350,7 +297,6 @@ fun CustomerMainScreen(
                                             available = worker.available,
 
                                             onRequestClick = {
-
                                                 showServiceRequest = true
                                             }
                                         )
@@ -359,7 +305,6 @@ fun CustomerMainScreen(
                                     selectedService != null -> {
 
                                         BackHandler {
-
                                             selectedService = null
                                         }
 
@@ -437,7 +382,14 @@ fun CustomerMainScreen(
                             4 -> {
 
                                 PaymentHistoryScreen(
-                                    payments = payments
+                                    payments = payments,
+
+                                    submittedRequests = submittedRequests,
+
+                                    onPaymentClick = { request ->
+
+                                        selectedPaymentRequest = request
+                                    }
                                 )
                             }
 
@@ -456,45 +408,21 @@ fun CustomerMainScreen(
                                     city = profileCity,
                                     photoUri = profilePhotoUri,
 
-                                    /*
-                                     * नया Customer Account
-                                     */
-                                    onAccountClick = {
-
-                                        profileSubScreen =
-                                            "customer_account"
-                                    },
-
-                                    /*
-                                     * पुराना Edit Profile
-                                     */
                                     onEditProfileClick = {
 
-                                        profileSubScreen =
-                                            "edit_profile"
+                                        profileSubScreen = "edit_profile"
                                     },
 
-                                    /*
-                                     * पुराना Settings
-                                     */
                                     onSettingsClick = {
 
-                                        profileSubScreen =
-                                            "settings"
+                                        profileSubScreen = "settings"
                                     },
 
-                                    /*
-                                     * पुराना Help
-                                     */
                                     onHelpClick = {
 
-                                        profileSubScreen =
-                                            "help"
+                                        profileSubScreen = "help"
                                     },
 
-                                    /*
-                                     * पुराना Logout
-                                     */
                                     onLogoutClick = {
 
                                         /*
@@ -508,7 +436,6 @@ fun CustomerMainScreen(
 
                                         profileSubScreen = null
                                         selectedIndex = 0
-
                                         selectedService = null
                                         selectedWorker = null
                                         showServiceRequest = false
