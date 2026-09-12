@@ -3,7 +3,6 @@ package com.rah885.kaamsetu.ui.screens.customer
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,8 +42,12 @@ fun PaymentScreen(
         onBack()
     }
 
-    var selectedMethod by remember {
-        mutableStateOf("UPI")
+    var showPaymentDetails by remember {
+        mutableStateOf(false)
+    }
+
+    var paymentCompleted by remember {
+        mutableStateOf(false)
     }
 
     Column(
@@ -106,6 +109,14 @@ fun PaymentScreen(
                 Text(
                     text = "📍 ${request.location}"
                 )
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
+                )
+
+                Text(
+                    text = "🕐 ${request.dateTime}"
+                )
             }
         }
 
@@ -113,125 +124,204 @@ fun PaymentScreen(
             modifier = Modifier.height(24.dp)
         )
 
-        Text(
-            text = "भुगतान का तरीका चुनें",
-            style = MaterialTheme.typography.titleLarge
-        )
+        /*
+         * Payment successful होने के बाद
+         * पूरा success result दिखाएँ।
+         */
+        if (paymentCompleted) {
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
 
-        PaymentMethodButton(
-            title = "📱 UPI",
-            selected = selectedMethod == "UPI",
-            onClick = {
-                selectedMethod = "UPI"
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+
+                    Text(
+                        text = "✅ भुगतान सफल",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
+                    )
+
+                    Text(
+                        text = "आपका भुगतान सफलतापूर्वक दर्ज हो गया है।",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    Text(
+                        text = "💰 राशि: ₹${request.price}"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "🔧 सर्विस: ${request.service}"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "👤 कामगार: ${request.workerName}"
+                    )
+                }
             }
-        )
 
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
 
-        PaymentMethodButton(
-            title = "📷 QR Code",
-            selected = selectedMethod == "QR",
-            onClick = {
-                selectedMethod = "QR"
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("← वापस जाएँ")
             }
-        )
 
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
+        } else if (showPaymentDetails) {
 
-        PaymentMethodButton(
-            title = "💳 Card",
-            selected = selectedMethod == "CARD",
-            onClick = {
-                selectedMethod = "CARD"
+            /*
+             * Pay Now दबाने के बाद
+             * confirmation screen।
+             */
+            Text(
+                text = "💳 भुगतान की पुष्टि",
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+
+                    Text(
+                        text = "आप इस भुगतान की पुष्टि करने वाले हैं।",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(12.dp)
+                    )
+
+                    Text(
+                        text = "🔧 सर्विस: ${request.service}"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "👤 कामगार: ${request.workerName}"
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "💰 कुल भुगतान: ₹${request.price}",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "📍 ${request.location}"
+                    )
+                }
             }
-        )
 
-        Spacer(
-            modifier = Modifier.height(8.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
 
-        PaymentMethodButton(
-            title = "🏦 Net Banking",
-            selected = selectedMethod == "NETBANKING",
-            onClick = {
-                selectedMethod = "NETBANKING"
+            Button(
+                onClick = {
+
+                    val payment = PaymentData(
+                        requestId = request.id,
+                        service = request.service,
+                        workerName = request.workerName,
+                        amount = request.price,
+                        dateTime = request.dateTime,
+                        status = "भुगतान सफल"
+                    )
+
+                    paymentCompleted = true
+
+                    onPaymentSuccess(payment)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("✅ भुगतान की पुष्टि करें")
             }
-        )
 
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
 
-        Text(
-            text = "चयनित भुगतान तरीका: $selectedMethod",
-            style = MaterialTheme.typography.bodyLarge
-        )
+            OutlinedButton(
+                onClick = {
+                    showPaymentDetails = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("← वापस")
+            }
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        } else {
 
-        Button(
-            onClick = {
+            Text(
+                text = "भुगतान करने के लिए नीचे दिए गए बटन पर क्लिक करें।",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-                val payment = PaymentData(
-                    requestId = request.id,
-                    service = request.service,
-                    workerName = request.workerName,
-                    amount = request.price,
-                    dateTime = request.dateTime,
-                    status = "भुगतान सफल"
-                )
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
 
-                onPaymentSuccess(payment)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("💳 भुगतान करें")
-        }
+            Button(
+                onClick = {
+                    showPaymentDetails = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("💳 Pay Now")
+            }
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
 
-        Text(
-            text = "ℹ️ अभी भुगतान डेमो मोड में है। चुने गए payment method के आधार पर अगला payment step बाद में जोड़ा जाएगा।",
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-@Composable
-private fun PaymentMethodButton(
-    title: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-
-    if (selected) {
-
-        Button(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(title)
-        }
-
-    } else {
-
-        OutlinedButton(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(title)
+            Text(
+                text = "ℹ️ अगला चरण: payment method और real UPI/QR payment जोड़ा जाएगा।",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
