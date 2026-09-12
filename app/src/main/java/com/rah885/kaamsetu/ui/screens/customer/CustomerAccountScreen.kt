@@ -14,8 +14,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.rah885.kaamsetu.data.database.AppDataEntity
+import com.rah885.kaamsetu.data.database.KaamSetuDatabase
+
+private const val CUSTOMER_ID_KEY = "customer_account_id"
 
 @Composable
 fun CustomerAccountScreen(
@@ -27,6 +37,60 @@ fun CustomerAccountScreen(
 
     BackHandler {
         onBack()
+    }
+
+    val context = LocalContext.current
+
+    val database = remember {
+        KaamSetuDatabase.getInstance(context)
+    }
+
+    val dao = remember {
+        database.appDataDao()
+    }
+
+    var permanentCustomerId by remember {
+        mutableStateOf(customerId)
+    }
+
+    var accountLoaded by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(Unit) {
+
+        val savedAccountId = dao.get(CUSTOMER_ID_KEY)
+
+        if (savedAccountId != null &&
+            savedAccountId.value.isNotBlank()
+        ) {
+
+            permanentCustomerId = savedAccountId.value
+
+        } else {
+
+            val newCustomerId =
+                if (customerId.isNotBlank()) {
+                    customerId
+                } else {
+                    "KS-C-${System.currentTimeMillis()}"
+                }
+
+            permanentCustomerId = newCustomerId
+
+            dao.save(
+                AppDataEntity(
+                    key = CUSTOMER_ID_KEY,
+                    value = newCustomerId
+                )
+            )
+        }
+
+        accountLoaded = true
+    }
+
+    if (!accountLoaded) {
+        return
     }
 
     val profileComplete =
@@ -69,7 +133,7 @@ fun CustomerAccountScreen(
                 )
 
                 Text(
-                    text = customerId,
+                    text = permanentCustomerId,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
@@ -78,7 +142,11 @@ fun CustomerAccountScreen(
                 )
 
                 Text(
-                    text = "👤 नाम: ${name.ifBlank { "अभी सेट नहीं है" }}",
+                    text = "👤 नाम: ${
+                        name.ifBlank {
+                            "अभी सेट नहीं है"
+                        }
+                    }",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
