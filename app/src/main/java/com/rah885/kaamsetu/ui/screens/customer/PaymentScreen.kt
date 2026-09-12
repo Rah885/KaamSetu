@@ -3,6 +3,7 @@ package com.rah885.kaamsetu.ui.screens.customer
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -35,6 +41,10 @@ fun PaymentScreen(
 
     BackHandler {
         onBack()
+    }
+
+    var selectedMethod by remember {
+        mutableStateOf("UPI")
     }
 
     Column(
@@ -104,7 +114,64 @@ fun PaymentScreen(
         )
 
         Text(
-            text = "भुगतान पूरा करने के लिए नीचे दिए गए बटन पर क्लिक करें।",
+            text = "भुगतान का तरीका चुनें",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        PaymentMethodButton(
+            title = "📱 UPI",
+            selected = selectedMethod == "UPI",
+            onClick = {
+                selectedMethod = "UPI"
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        PaymentMethodButton(
+            title = "📷 QR Code",
+            selected = selectedMethod == "QR",
+            onClick = {
+                selectedMethod = "QR"
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        PaymentMethodButton(
+            title = "💳 Card",
+            selected = selectedMethod == "CARD",
+            onClick = {
+                selectedMethod = "CARD"
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        PaymentMethodButton(
+            title = "🏦 Net Banking",
+            selected = selectedMethod == "NETBANKING",
+            onClick = {
+                selectedMethod = "NETBANKING"
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+        Text(
+            text = "चयनित भुगतान तरीका: $selectedMethod",
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -136,8 +203,35 @@ fun PaymentScreen(
         )
 
         Text(
-            text = "ℹ️ यह अभी डेमो भुगतान है। असली payment gateway अगले चरण में जोड़ा जाएगा।",
+            text = "ℹ️ अभी भुगतान डेमो मोड में है। चुने गए payment method के आधार पर अगला payment step बाद में जोड़ा जाएगा।",
             style = MaterialTheme.typography.bodyMedium
         )
+    }
+}
+
+@Composable
+private fun PaymentMethodButton(
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    if (selected) {
+
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(title)
+        }
+
+    } else {
+
+        OutlinedButton(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(title)
+        }
     }
 }
