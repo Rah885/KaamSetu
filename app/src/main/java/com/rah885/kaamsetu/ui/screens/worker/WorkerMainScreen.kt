@@ -292,7 +292,9 @@ fun WorkerMainScreen(
                         }
 
                         2 -> {
-                            MyJobsScreen()
+                            MyJobsScreen(
+                                serviceRequests = serviceRequests
+                            )
                         }
 
                         3 -> {
