@@ -88,6 +88,18 @@ fun CustomerMainScreen(
     }
 
     /*
+     * =========================
+     * CUSTOMER ACCOUNT
+     * =========================
+     */
+
+    var customerId by rememberSaveable {
+        mutableStateOf(
+            "KS-C-${System.currentTimeMillis()}"
+        )
+    }
+
+    /*
      * Profile के अंदर की screens
      */
     var profileSubScreen by rememberSaveable {
@@ -154,6 +166,35 @@ fun CustomerMainScreen(
 
             when (profileSubScreen) {
 
+                /*
+                 * =========================
+                 * CUSTOMER ACCOUNT
+                 * =========================
+                 */
+
+                "customer_account" -> {
+
+                    BackHandler {
+                        profileSubScreen = null
+                    }
+
+                    CustomerAccountScreen(
+                        customerId = customerId,
+                        name = profileName,
+                        mobile = profileMobile,
+
+                        onBack = {
+                            profileSubScreen = null
+                        }
+                    )
+                }
+
+                /*
+                 * =========================
+                 * EDIT PROFILE
+                 * =========================
+                 */
+
                 "edit_profile" -> {
 
                     BackHandler {
@@ -185,6 +226,12 @@ fun CustomerMainScreen(
                     )
                 }
 
+                /*
+                 * =========================
+                 * SETTINGS
+                 * =========================
+                 */
+
                 "settings" -> {
 
                     BackHandler {
@@ -193,6 +240,12 @@ fun CustomerMainScreen(
 
                     SettingsScreen()
                 }
+
+                /*
+                 * =========================
+                 * HELP
+                 * =========================
+                 */
 
                 "help" -> {
 
@@ -403,21 +456,45 @@ fun CustomerMainScreen(
                                     city = profileCity,
                                     photoUri = profilePhotoUri,
 
+                                    /*
+                                     * नया Customer Account
+                                     */
+                                    onAccountClick = {
+
+                                        profileSubScreen =
+                                            "customer_account"
+                                    },
+
+                                    /*
+                                     * पुराना Edit Profile
+                                     */
                                     onEditProfileClick = {
 
-                                        profileSubScreen = "edit_profile"
+                                        profileSubScreen =
+                                            "edit_profile"
                                     },
 
+                                    /*
+                                     * पुराना Settings
+                                     */
                                     onSettingsClick = {
 
-                                        profileSubScreen = "settings"
+                                        profileSubScreen =
+                                            "settings"
                                     },
 
+                                    /*
+                                     * पुराना Help
+                                     */
                                     onHelpClick = {
 
-                                        profileSubScreen = "help"
+                                        profileSubScreen =
+                                            "help"
                                     },
 
+                                    /*
+                                     * पुराना Logout
+                                     */
                                     onLogoutClick = {
 
                                         /*
