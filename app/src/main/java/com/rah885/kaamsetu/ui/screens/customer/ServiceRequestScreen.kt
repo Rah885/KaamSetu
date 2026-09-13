@@ -1,6 +1,13 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.LocationManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +22,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.rah885.kaamsetu.data.database.KaamSetuDatabase
 import com.rah885.kaamsetu.data.database.NotificationRepository
 import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.concurrent.Executors
 
 data class ServiceRequestData(
     val id: Long = System.currentTimeMillis(),
@@ -36,6 +48,8 @@ data class ServiceRequestData(
     val description: String,
     val location: String,
     val dateTime: String,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
     val status: String = "रिक्वेस्ट भेजी गई",
     val price: String = "",
     val rating: Int = 0,
@@ -76,8 +90,83 @@ fun ServiceRequestScreen(
         mutableStateOf("")
     }
 
+    var latitude by rememberSaveable {
+        mutableStateOf(0.0)
+    }
+
+    var longitude by rememberSaveable {
+        mutableStateOf(0.0)
+    }
+
+    var locationLoading by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var locationMessage by rememberSaveable {
+        mutableStateOf("")
+    }
+
     var requestSubmitted by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    val locationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val fineGranted =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            val coarseGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (fineGranted || coarseGranted) {
+                getCurrentLocation(
+                    context = context,
+                    onLoading = {
+                        locationLoading = it
+                    },
+                    onLocation = { lat, lon, address ->
+
+                        latitude = lat
+                        longitude = lon
+
+                        if (address.isNotBlank()) {
+                            location = address
+                        }
+
+                        locationMessage =
+                            "✅ Location मिल गई।"
+                    },
+                    onError = {
+                        locationMessage = it
+                    }
+                )
+            } else {
+                locationMessage =
+                    "⚠️ Location permission जरूरी है।"
+            }
+        }
+
+    LaunchedEffect(Unit) {
+
+        val fineGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+        if (fineGranted || coarseGranted) {
+            // Permission पहले से दी हुई है।
+            // Location तभी ली जाएगी जब user button दबाएगा।
+        }
     }
 
     Column(
@@ -192,6 +281,95 @@ fun ServiceRequestScreen(
             modifier = Modifier.height(12.dp)
         )
 
+        Button(
+            onClick = {
+
+                val fineGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                val coarseGranted =
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                if (fineGranted || coarseGranted) {
+
+                    getCurrentLocation(
+                        context = context,
+                        onLoading = {
+                            locationLoading = it
+                        },
+                        onLocation = { lat, lon, address ->
+
+                            latitude = lat
+                            longitude = lon
+
+                            if (address.isNotBlank()) {
+                                location = address
+                            }
+
+                            locationMessage =
+                                "✅ Location मिल गई।"
+                        },
+                        onError = {
+                            locationMessage = it
+                        }
+                    )
+
+                } else {
+
+                    locationPermissionLauncher.launch(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !locationLoading
+        ) {
+            Text(
+                if (locationLoading) {
+                    "📍 Location मिल रही है..."
+                } else {
+                    "📍 मेरी वर्तमान लोकेशन लें"
+                }
+            )
+        }
+
+        if (locationMessage.isNotBlank()) {
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = locationMessage,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        if (latitude != 0.0 && longitude != 0.0) {
+
+            Spacer(
+                modifier = Modifier.height(6.dp)
+            )
+
+            Text(
+                text = "📌 Coordinates: $latitude, $longitude",
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
         OutlinedTextField(
             value = location,
             onValueChange = {
@@ -199,10 +377,10 @@ fun ServiceRequestScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             label = {
-                Text("काम की जगह")
+                Text("काम की जगह / पता")
             },
             placeholder = {
-                Text("अपना पता या क्षेत्र लिखें")
+                Text("GPS से पता आएगा या अपना पता लिखें")
             },
             minLines = 2
         )
@@ -249,7 +427,9 @@ fun ServiceRequestScreen(
                     mobile = mobile,
                     description = description,
                     location = location,
-                    dateTime = dateTime
+                    dateTime = dateTime,
+                    latitude = latitude,
+                    longitude = longitude
                 )
 
                 onRequestSubmitted(request)
@@ -264,9 +444,11 @@ fun ServiceRequestScreen(
 
                     scope.launch {
 
-                        val database = KaamSetuDatabase.getInstance(context)
+                        val database =
+                            KaamSetuDatabase.getInstance(context)
 
-                        val repository = NotificationRepository(database)
+                        val repository =
+                            NotificationRepository(database)
 
                         repository.createNotification(
                             recipientId = selectedWorker,
@@ -309,5 +491,187 @@ fun ServiceRequestScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+    }
+}
+
+private fun getCurrentLocation(
+    context: Context,
+    onLoading: (Boolean) -> Unit,
+    onLocation: (Double, Double, String) -> Unit,
+    onError: (String) -> Unit
+) {
+
+    val locationManager =
+        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    val fineGranted =
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+    val coarseGranted =
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+    if (!fineGranted && !coarseGranted) {
+        onError("⚠️ Location permission नहीं मिली।")
+        return
+    }
+
+    val provider = when {
+
+        locationManager.isProviderEnabled(
+            LocationManager.GPS_PROVIDER
+        ) -> LocationManager.GPS_PROVIDER
+
+        locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        ) -> LocationManager.NETWORK_PROVIDER
+
+        else -> null
+    }
+
+    if (provider == null) {
+        onError("⚠️ Phone की Location/GPS बंद है। कृपया Location चालू करें।")
+        return
+    }
+
+    onLoading(true)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+        val cancellationSignal =
+            android.os.CancellationSignal()
+
+        locationManager.getCurrentLocation(
+            provider,
+            cancellationSignal,
+            Executors.newSingleThreadExecutor()
+        ) { currentLocation ->
+
+            onLoading(false)
+
+            if (currentLocation == null) {
+
+                onError(
+                    "⚠️ Current location नहीं मिल पाई। कृपया बाहर/खुले स्थान पर दोबारा कोशिश करें।"
+                )
+
+            } else {
+
+                val lat = currentLocation.latitude
+                val lon = currentLocation.longitude
+
+                val address =
+                    getAddressFromCoordinates(
+                        context,
+                        lat,
+                        lon
+                    )
+
+                onLocation(
+                    lat,
+                    lon,
+                    address
+                )
+            }
+        }
+
+    } else {
+
+        val lastLocation = try {
+
+            locationManager.getLastKnownLocation(
+                provider
+            )
+
+        } catch (exception: SecurityException) {
+            null
+        }
+
+        onLoading(false)
+
+        if (lastLocation == null) {
+
+            onError(
+                "⚠️ Location नहीं मिल पाई। कृपया GPS चालू करके दोबारा कोशिश करें।"
+            )
+
+        } else {
+
+            val lat = lastLocation.latitude
+            val lon = lastLocation.longitude
+
+            val address =
+                getAddressFromCoordinates(
+                    context,
+                    lat,
+                    lon
+                )
+
+            onLocation(
+                lat,
+                lon,
+                address
+            )
+        }
+    }
+}
+
+private fun getAddressFromCoordinates(
+    context: Context,
+    latitude: Double,
+    longitude: Double
+): String {
+
+    return try {
+
+        val geocoder =
+            Geocoder(
+                context,
+                Locale.getDefault()
+            )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            var result = ""
+
+            geocoder.getFromLocation(
+                latitude,
+                longitude,
+                1
+            ) { addresses ->
+
+                if (addresses.isNotEmpty()) {
+                    result =
+                        addresses[0].getAddressLine(0) ?: ""
+                }
+            }
+
+            result
+
+        } else {
+
+            @Suppress("DEPRECATION")
+            val addresses =
+                geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    1
+                )
+
+            @Suppress("DEPRECATION")
+            if (!addresses.isNullOrEmpty()) {
+                addresses[0].getAddressLine(0) ?: ""
+            } else {
+                ""
+            }
+        }
+
+    } catch (exception: Exception) {
+        ""
     }
 }
