@@ -20,14 +20,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.rah885.kaamsetu.data.database.KaamSetuDatabase
+import com.rah885.kaamsetu.data.database.NotificationRepository
 import com.rah885.kaamsetu.ui.screens.customer.ServiceRequestData
+import kotlinx.coroutines.launch
 
 private const val MIN_PRICE = 100
 private const val MAX_PRICE = 5000
+
+private const val WORKER_PROFILE_NAME = "worker_profile_name"
 
 @Composable
 fun NewRequestsScreen(
@@ -90,6 +97,9 @@ private fun RequestCard(
     request: ServiceRequestData,
     onRequestUpdated: (ServiceRequestData) -> Unit
 ) {
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var priceInput by rememberSaveable(request.id) {
         mutableStateOf("")
@@ -187,6 +197,39 @@ private fun RequestCard(
                                     status = "काम स्वीकार किया गया"
                                 )
                             )
+
+                            /*
+                             * Worker ने Customer की request accept कर ली।
+                             * Customer के mobile number को recipientId की तरह
+                             * इस्तेमाल करके Customer के Alerts में notification save करें।
+                             */
+                            if (request.mobile.isNotBlank()) {
+                                scope.launch {
+
+                                    val database =
+                                        KaamSetuDatabase.getInstance(context)
+
+                                    val repository =
+                                        NotificationRepository(database)
+
+                                    val workerName =
+                                        database.appDataDao()
+                                            .get(WORKER_PROFILE_NAME)
+                                            ?.value
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: "कामगार"
+
+                                    repository.createNotification(
+                                        recipientId = request.mobile,
+                                        senderId = workerName,
+                                        recipientRole = "CUSTOMER",
+                                        type = "REQUEST_ACCEPTED",
+                                        title = "🔔 कामगार ने आपकी रिक्वेस्ट स्वीकार कर ली",
+                                        message = "$workerName ने आपके ${request.service} के काम की रिक्वेस्ट स्वीकार कर ली है।",
+                                        referenceId = request.id.toString()
+                                    )
+                                }
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
