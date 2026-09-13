@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-private data class NotificationItem(
+data class NotificationItem(
     val id: Long,
     val title: String,
     val message: String,
