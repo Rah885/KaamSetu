@@ -1,5 +1,6 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +17,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.rah885.kaamsetu.data.database.KaamSetuDatabase
+import com.rah885.kaamsetu.data.database.NotificationRepository
+import kotlinx.coroutines.launch
 
 data class ServiceRequestData(
     val id: Long = System.currentTimeMillis(),
@@ -42,6 +48,9 @@ fun ServiceRequestScreen(
     selectedWorker: String = "",
     onRequestSubmitted: (ServiceRequestData) -> Unit = {}
 ) {
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var service by rememberSaveable {
         mutableStateOf(selectedService)
@@ -244,6 +253,32 @@ fun ServiceRequestScreen(
                 )
 
                 onRequestSubmitted(request)
+
+                /*
+                 * Customer ने Worker को नई Service Request भेजी।
+                 * अभी Worker Account ID उपलब्ध नहीं है,
+                 * इसलिए selectedWorker का नाम recipient key के रूप में
+                 * इस्तेमाल किया जा रहा है।
+                 */
+                if (selectedWorker.isNotBlank()) {
+
+                    scope.launch {
+
+                        val database = KaamSetuDatabase.getInstance(context)
+
+                        val repository = NotificationRepository(database)
+
+                        repository.createNotification(
+                            recipientId = selectedWorker,
+                            senderId = mobile,
+                            recipientRole = "WORKER",
+                            type = "NEW_SERVICE_REQUEST",
+                            title = "🔔 नई सर्विस रिक्वेस्ट",
+                            message = "$customerName ने $service के लिए आपको नई सर्विस रिक्वेस्ट भेजी है।",
+                            referenceId = request.id.toString()
+                        )
+                    }
+                }
 
                 requestSubmitted = true
             },
