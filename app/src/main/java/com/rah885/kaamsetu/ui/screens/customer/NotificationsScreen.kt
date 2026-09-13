@@ -1,5 +1,6 @@
 package com.rah885.kaamsetu.ui.screens.customer
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,39 +20,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 private data class NotificationItem(
+    val id: Long,
     val title: String,
     val message: String,
     val time: String,
-    val icon: String
+    val icon: String,
+    val type: String,
+    val referenceId: String?,
+    val isRead: Boolean
 )
 
 @Composable
-fun NotificationsScreen() {
+fun NotificationsScreen(
+    onNotificationClick: (NotificationItem) -> Unit = {}
+) {
 
+    // Temporary data.
+    // Later this will come from Room Database.
     val notifications = listOf(
         NotificationItem(
+            id = 1L,
             title = "कामगार उपलब्ध है",
             message = "आपकी इलेक्ट्रिशियन रिक्वेस्ट के लिए एक कामगार उपलब्ध है।",
             time = "5 मिनट पहले",
-            icon = "🔧"
+            icon = "🔧",
+            type = "WORKER_RESPONSE",
+            referenceId = "request_1",
+            isRead = false
         ),
         NotificationItem(
+            id = 2L,
             title = "रिक्वेस्ट अपडेट",
             message = "आपकी प्लंबर रिक्वेस्ट पर कामगार ने प्रतिक्रिया दी है।",
             time = "1 घंटे पहले",
-            icon = "🚰"
+            icon = "🚰",
+            type = "REQUEST_UPDATE",
+            referenceId = "request_2",
+            isRead = false
         ),
         NotificationItem(
+            id = 3L,
             title = "रिक्वेस्ट भेजी गई",
             message = "आपकी मैकेनिक सर्विस रिक्वेस्ट सफलतापूर्वक भेज दी गई है।",
             time = "कल",
-            icon = "📋"
+            icon = "📋",
+            type = "REQUEST_CREATED",
+            referenceId = "request_3",
+            isRead = true
         ),
         NotificationItem(
+            id = 4L,
             title = "कामसेतु में आपका स्वागत है",
             message = "अब आप अपने आसपास भरोसेमंद कामगार आसानी से खोज सकते हैं।",
             time = "2 दिन पहले",
-            icon = "🎉"
+            icon = "🎉",
+            type = "WELCOME",
+            referenceId = null,
+            isRead = true
         )
     )
 
@@ -80,10 +106,16 @@ fun NotificationsScreen() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            items(notifications) { notification ->
+            items(
+                items = notifications,
+                key = { notification -> notification.id }
+            ) { notification ->
 
                 NotificationCard(
-                    notification = notification
+                    notification = notification,
+                    onClick = {
+                        onNotificationClick(notification)
+                    }
                 )
             }
         }
@@ -92,11 +124,23 @@ fun NotificationsScreen() {
 
 @Composable
 private fun NotificationCard(
-    notification: NotificationItem
+    notification: NotificationItem,
+    onClick: () -> Unit
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
+        colors = if (notification.isRead) {
+            CardDefaults.cardColors()
+        } else {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        }
     ) {
 
         Row(
