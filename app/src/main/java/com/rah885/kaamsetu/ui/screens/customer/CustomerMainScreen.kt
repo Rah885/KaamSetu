@@ -370,7 +370,9 @@ fun CustomerMainScreen(
 
                             3 -> {
 
-                                NotificationsScreen()
+                                NotificationsScreen(
+                                    recipientId = profileMobile
+                                )
                             }
 
                             /*
