@@ -58,6 +58,7 @@ fun WorkerMainScreen(
         WorkerNavItem("Requests", "📋"),
         WorkerNavItem("Jobs", "🔧"),
         WorkerNavItem("Earnings", "💰"),
+        WorkerNavItem("Alerts", "🔔"),
         WorkerNavItem("Profile", "👤")
     )
 
@@ -302,6 +303,12 @@ fun WorkerMainScreen(
                         }
 
                         4 -> {
+                            WorkerNotificationsScreen(
+                                workerId = profileName
+                            )
+                        }
+
+                        5 -> {
 
                             WorkerProfileScreen(
                                 name = profileName,
