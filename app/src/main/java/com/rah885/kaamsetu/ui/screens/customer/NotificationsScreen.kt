@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.rah885.kaamsetu.data.database.KaamSetuDatabase
 import com.rah885.kaamsetu.data.database.NotificationEntity
 import com.rah885.kaamsetu.data.database.NotificationRepository
+import kotlinx.coroutines.launch
 
 data class NotificationItem(
     val id: Long,
@@ -46,6 +48,7 @@ fun NotificationsScreen(
 ) {
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var notifications by remember {
         mutableStateOf<List<NotificationEntity>>(emptyList())
@@ -59,7 +62,9 @@ fun NotificationsScreen(
             val repository = NotificationRepository(database)
 
             notifications = repository.getNotifications(recipientId)
+
         } else {
+
             notifications = emptyList()
         }
     }
@@ -124,15 +129,24 @@ fun NotificationsScreen(
 
                             if (!notification.isRead) {
 
-                                val database =
-                                    KaamSetuDatabase.getInstance(context)
+                                scope.launch {
 
-                                val repository =
-                                    NotificationRepository(database)
+                                    val database =
+                                        KaamSetuDatabase.getInstance(context)
 
-                                kotlinx.coroutines.MainScope().launch {
+                                    val repository =
+                                        NotificationRepository(database)
 
                                     repository.markAsRead(notification.id)
+
+                                    notifications = notifications.map { item ->
+
+                                        if (item.id == notification.id) {
+                                            item.copy(isRead = true)
+                                        } else {
+                                            item
+                                        }
+                                    }
                                 }
                             }
 
