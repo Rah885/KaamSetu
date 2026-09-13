@@ -19,6 +19,8 @@ abstract class KaamSetuDatabase : RoomDatabase() {
 
     abstract fun appDataDao(): AppDataDao
 
+    abstract fun notificationDao(): NotificationDao
+
     companion object {
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
