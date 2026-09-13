@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.rah885.kaamsetu.data.database.KaamSetuDatabase
 import com.rah885.kaamsetu.data.database.NotificationEntity
@@ -30,16 +31,15 @@ fun WorkerNotificationsScreen(
     workerId: String,
     onNotificationClick: (NotificationEntity) -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     var notifications by remember {
         mutableStateOf<List<NotificationEntity>>(emptyList())
     }
 
     LaunchedEffect(workerId) {
         if (workerId.isNotBlank()) {
-            val database = KaamSetuDatabase.getInstance(
-                androidx.compose.ui.platform.LocalContext.current
-            )
-
+            val database = KaamSetuDatabase.getInstance(context)
             val repository = NotificationRepository(database)
 
             notifications = repository.getNotifications(workerId)
@@ -61,7 +61,7 @@ fun WorkerNotificationsScreen(
         if (notifications.isEmpty()) {
 
             Text(
-                text = "अभी कोई नया alert नहीं है।",
+                text = "अभी कोई alert नहीं है।",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(16.dp)
             )
@@ -106,7 +106,7 @@ fun WorkerNotificationsScreen(
                                 text = if (notification.isRead) {
                                     "पढ़ा गया"
                                 } else {
-                                    "नया"
+                                    "🆕 नया alert"
                                 },
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(top = 8.dp)
