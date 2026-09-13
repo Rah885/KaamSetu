@@ -16,8 +16,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.rah885.kaamsetu.data.database.KaamSetuDatabase
+import com.rah885.kaamsetu.data.database.NotificationEntity
+import com.rah885.kaamsetu.data.database.NotificationRepository
 
 data class NotificationItem(
     val id: Long,
@@ -32,53 +41,42 @@ data class NotificationItem(
 
 @Composable
 fun NotificationsScreen(
+    recipientId: String = "",
     onNotificationClick: (NotificationItem) -> Unit = {}
 ) {
 
-    // Temporary data.
-    // Later this will come from Room Database.
-    val notifications = listOf(
+    val context = LocalContext.current
+
+    var notifications by remember {
+        mutableStateOf<List<NotificationEntity>>(emptyList())
+    }
+
+    LaunchedEffect(recipientId) {
+
+        if (recipientId.isNotBlank()) {
+
+            val database = KaamSetuDatabase.getInstance(context)
+            val repository = NotificationRepository(database)
+
+            notifications = repository.getNotifications(recipientId)
+        } else {
+            notifications = emptyList()
+        }
+    }
+
+    val notificationItems = notifications.map { notification ->
+
         NotificationItem(
-            id = 1L,
-            title = "कामगार उपलब्ध है",
-            message = "आपकी इलेक्ट्रिशियन रिक्वेस्ट के लिए एक कामगार उपलब्ध है।",
-            time = "5 मिनट पहले",
-            icon = "🔧",
-            type = "WORKER_RESPONSE",
-            referenceId = "request_1",
-            isRead = false
-        ),
-        NotificationItem(
-            id = 2L,
-            title = "रिक्वेस्ट अपडेट",
-            message = "आपकी प्लंबर रिक्वेस्ट पर कामगार ने प्रतिक्रिया दी है।",
-            time = "1 घंटे पहले",
-            icon = "🚰",
-            type = "REQUEST_UPDATE",
-            referenceId = "request_2",
-            isRead = false
-        ),
-        NotificationItem(
-            id = 3L,
-            title = "रिक्वेस्ट भेजी गई",
-            message = "आपकी मैकेनिक सर्विस रिक्वेस्ट सफलतापूर्वक भेज दी गई है।",
-            time = "कल",
-            icon = "📋",
-            type = "REQUEST_CREATED",
-            referenceId = "request_3",
-            isRead = true
-        ),
-        NotificationItem(
-            id = 4L,
-            title = "कामसेतु में आपका स्वागत है",
-            message = "अब आप अपने आसपास भरोसेमंद कामगार आसानी से खोज सकते हैं।",
-            time = "2 दिन पहले",
-            icon = "🎉",
-            type = "WELCOME",
-            referenceId = null,
-            isRead = true
+            id = notification.id,
+            title = notification.title,
+            message = notification.message,
+            time = formatNotificationTime(notification.createdAt),
+            icon = getNotificationIcon(notification.type),
+            type = notification.type,
+            referenceId = notification.referenceId,
+            isRead = notification.isRead
         )
-    )
+    }
 
     Column(
         modifier = Modifier
@@ -101,22 +99,47 @@ fun NotificationsScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        if (notificationItems.isEmpty()) {
 
-            items(
-                items = notifications,
-                key = { notification -> notification.id }
-            ) { notification ->
+            Text(
+                text = "अभी कोई notification नहीं है।",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-                NotificationCard(
-                    notification = notification,
-                    onClick = {
-                        onNotificationClick(notification)
-                    }
-                )
+        } else {
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                items(
+                    items = notificationItems,
+                    key = { notification -> notification.id }
+                ) { notification ->
+
+                    NotificationCard(
+                        notification = notification,
+                        onClick = {
+
+                            if (!notification.isRead) {
+
+                                val database =
+                                    KaamSetuDatabase.getInstance(context)
+
+                                val repository =
+                                    NotificationRepository(database)
+
+                                kotlinx.coroutines.MainScope().launch {
+
+                                    repository.markAsRead(notification.id)
+                                }
+                            }
+
+                            onNotificationClick(notification)
+                        }
+                    )
+                }
             }
         }
     }
@@ -182,7 +205,72 @@ private fun NotificationCard(
                     text = notification.time,
                     style = MaterialTheme.typography.labelMedium
                 )
+
+                if (!notification.isRead) {
+
+                    Spacer(
+                        modifier = Modifier.height(4.dp)
+                    )
+
+                    Text(
+                        text = "🆕 नया alert",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
         }
+    }
+}
+
+private fun getNotificationIcon(type: String): String {
+
+    return when (type) {
+
+        "NEW_SERVICE_REQUEST" -> "🔔"
+
+        "REQUEST_ACCEPTED" -> "✅"
+
+        "PRICE_SENT" -> "💰"
+
+        "PRICE_ACCEPTED" -> "👍"
+
+        "PRICE_REJECTED" -> "❌"
+
+        "PAYMENT_RECEIVED" -> "💳"
+
+        "WORK_STARTED" -> "🔧"
+
+        "WORK_COMPLETED" -> "✅"
+
+        "RATING_REVIEW" -> "⭐"
+
+        else -> "🔔"
+    }
+}
+
+private fun formatNotificationTime(createdAt: Long): String {
+
+    val difference = System.currentTimeMillis() - createdAt
+
+    val minute = 60 * 1000L
+    val hour = 60 * minute
+    val day = 24 * hour
+
+    return when {
+
+        difference < minute ->
+            "अभी"
+
+        difference < hour ->
+            "${difference / minute} मिनट पहले"
+
+        difference < day ->
+            "${difference / hour} घंटे पहले"
+
+        difference < 2 * day ->
+            "कल"
+
+        else ->
+            "${difference / day} दिन पहले"
     }
 }
